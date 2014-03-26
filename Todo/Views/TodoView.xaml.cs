@@ -16,21 +16,14 @@ using System.Windows.Shapes;
 namespace Todo_Net
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for TodoView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class TodoView : UserControl
     {
-        public MainWindow()
+        public TodoView()
         {
             InitializeComponent();
         }
 
-        protected override void OnInitialized(EventArgs e)
-        {
-            base.OnInitialized(e);
-
-            var app = Application.Current as App;
-            this.LayoutRoot.Children.Add(app.MainView);
-        }
     }
 }

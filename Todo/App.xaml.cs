@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 using Breeze.Core;
 using Breeze.Sharp;
@@ -17,40 +18,30 @@ namespace Todo_Net
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application, INotifyPropertyChanged
+    public partial class App : Application
     {
-        private EntityManager _em;
-
+        private TodoViewModel _mainViewModel;
+        
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            MetadataStore.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
-            var serviceName = "http://localhost:63030/breeze/Todos/";
-            _em = new EntityManager(serviceName);
-            QueryAllTodos();
+            // Create the Breeze entity manager
+            var serviceAddress = "http://localhost:63030/breeze/Todos/";
+            var assembly = typeof(TodoItem).Assembly;
+            var rslt = MetadataStore.Instance.ProbeAssemblies(assembly);
+            var entityManager = new EntityManager(serviceAddress);
+
+            // Create the main viewModel and view
+            _mainViewModel = new TodoViewModel(entityManager);
         }
 
-        private async void QueryAllTodos()
+        /// <summary>
+        /// Supplies the main view when requested by the main window
+        /// </summary>
+        public UserControl MainView 
         {
-            var query = new EntityQuery<TodoItem>();
-            Todos = await _em.ExecuteQuery(query);
+            get { return _mainViewModel.View; }
         }
-
-        public IEnumerable<TodoItem> Todos
-        {
-            get { return _todos; }
-            set
-            {
-                _todos = value;
-                if (PropertyChanged != null)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs("Todos"));
-                }
-            }
-        }
-        private IEnumerable<TodoItem> _todos = new TodoItem[0];
-
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
