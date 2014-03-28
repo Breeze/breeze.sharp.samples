@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-using Breeze.Core;
+using Breeze.Sharp.Core;
 using Breeze.Sharp;
 
 using Todo.Models;

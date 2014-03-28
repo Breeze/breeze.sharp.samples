@@ -9,7 +9,7 @@ using System.Net;
 
 using System.Windows.Input;
 
-using Breeze.Core;
+using Breeze.Sharp.Core;
 using Breeze.Sharp;
 
 using Todo.Models;
