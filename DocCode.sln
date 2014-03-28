@@ -7,9 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Breeze.Sharp", "..\Breeze.s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocCode", "DocCode\DocCode.csproj", "{4D6A9F58-1E92-4EB1-996F-7D7328975740}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model_Northwind.Sharp", "Model_Northwind.Sharp\Model_Northwind.Sharp.csproj", "{E357F17B-6A21-4682-B7C8-3EBFEBF862F3}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client Unit Tests", "Client Unit Tests", "{70969F0E-398F-4CB3-80C9-9DED2E7A8A77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model_Inheritance.Sharp", "Model_Inheritance.Sharp\Model_Inheritance.Sharp.csproj", "{58B41CC6-8D34-40C4-9342-DB55AE6CCA02}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client_Models", "Client_Models", "{62BC674C-FD43-4C25-90DC-08D55652EAF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model_Northwind.Sharp", "Model_Northwind.Sharp\Model_Northwind.Sharp.csproj", "{E357F17B-6A21-4682-B7C8-3EBFEBF862F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,12 +31,12 @@ Global
 		{E357F17B-6A21-4682-B7C8-3EBFEBF862F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E357F17B-6A21-4682-B7C8-3EBFEBF862F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E357F17B-6A21-4682-B7C8-3EBFEBF862F3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{58B41CC6-8D34-40C4-9342-DB55AE6CCA02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58B41CC6-8D34-40C4-9342-DB55AE6CCA02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58B41CC6-8D34-40C4-9342-DB55AE6CCA02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58B41CC6-8D34-40C4-9342-DB55AE6CCA02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4D6A9F58-1E92-4EB1-996F-7D7328975740} = {70969F0E-398F-4CB3-80C9-9DED2E7A8A77}
+		{E357F17B-6A21-4682-B7C8-3EBFEBF862F3} = {62BC674C-FD43-4C25-90DC-08D55652EAF0}
 	EndGlobalSection
 EndGlobal

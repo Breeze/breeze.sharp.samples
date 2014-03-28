@@ -8,7 +8,7 @@ using System.Data;
 using Breeze.Sharp;
 using System.Spatial;
 
-namespace Foo {
+namespace Northwind.Models {
 
   public partial class Category : BaseEntity {
 
@@ -93,6 +93,16 @@ namespace Foo {
     public int? RowVersion  {
       get { return GetValue<int?>(); }
       set { SetValue(value); }
+    }
+
+    public int? FragusIndex {
+      get { return GetValue<int?>(); }
+      set { SetValue(value); }
+    }
+
+    public int? OrderCount {
+        get { return GetValue<int?>(); }
+        set { SetValue(value); }
     }
 
     public NavigationSet<Order> Orders {
@@ -292,6 +302,11 @@ namespace Foo {
     public InternationalOrder InternationalOrder {
       get { return GetValue<InternationalOrder>(); }
       set { SetValue(value); }
+    }
+
+    public string CustomerName {
+        get { return GetValue<string>(); }
+        set { SetValue(value); }
     }
 
   }

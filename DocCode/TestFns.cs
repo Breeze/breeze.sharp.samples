@@ -8,7 +8,7 @@ using System.Windows.Threading;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using Breeze.Core;
+using Breeze.Sharp.Core;
 using Breeze.Sharp;
 
 namespace Test_NetClient
@@ -91,19 +91,17 @@ namespace Test_NetClient
         }
 
         public static async Task VerifyQuery(EntityQuery query, string serviceName, string testName = "unknown test") {
-            var entityManager = await NewEm(serviceName);
-            await entityManager.ExecuteQuery(query).ContinueWith(task =>
-            {
-                if (task.IsFaulted) {
-                    var message = FormatException(task.Exception);
-                    Assert.Fail(message);
-                }
-                else {
-                    var results = task.Result;
-                    var count = results.OfType<Object>().Count();
-                    Assert.IsTrue(count > 0, testName + ": Should return 1 or more entities.  Returned " + count);
-                }
-            });
+            try {
+                var entityManager = await NewEm(serviceName);
+                var results = await entityManager.ExecuteQuery(query);
+                var count = results.OfType<Object>().Count();
+                Assert.IsTrue(count > 0, testName + ": Should return 1 or more entities.  Returned " + count);
+            }
+            catch (Exception e) {
+                var message = FormatException(e);
+                Assert.Fail(message);
+            }
+
         }
 
         public static string FormatException(Exception e) {
