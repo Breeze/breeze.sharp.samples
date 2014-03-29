@@ -296,7 +296,7 @@ namespace Test_NetClient
             var results = await q3.Execute(em1);
 
             Assert.IsTrue(results.Count() > 0);
-            var ok = results.All(r1 => (r1.Orders.Count() > 0) && r1.Orders.All(o => o.GetType() == typeof(Order)));
+            var ok = results.All(r1 => (r1.Orders.Any()) );
             Assert.IsTrue(ok, "every item of anon should contain a collection of Orders");
         }
 
@@ -309,7 +309,7 @@ namespace Test_NetClient
             var results = await q3.Execute(em1);
 
             Assert.IsTrue(results.Count() > 0);
-            var ok = results.All(r1 => (r1.Orders.Count() > 0) && r1.Orders.All(o => o.GetType() == typeof(Order)));
+            var ok = results.All(r1 => (r1.Orders.Count() > 0));
             Assert.IsTrue(ok, "every item of anon should contain a collection of Orders");
             ok = results.All(r1 => r1.CompanyName.Length > 0);
             Assert.IsTrue(ok, "anon type should have a populated company name");
@@ -361,8 +361,7 @@ namespace Test_NetClient
             Assert.IsTrue(results.Count() > 0);
             var ok = results.All(r1 =>
               r1.GetType() == typeof(Customer) &&
-              r1.Orders.Count() > 0 &&
-              r1.Orders.All(o => o.GetType() == typeof(Order)) &&
+              r1.Orders.Any() &&
               r1.Orders.All(o => o.Customer == r1));
             Assert.IsTrue(ok, "every Customer should contain a collection of Orders");
             ok = results.All(r1 => r1.CompanyName.Length > 0);
@@ -379,7 +378,6 @@ namespace Test_NetClient
 
             Assert.IsTrue(results.Count() > 0);
             var ok = results.All(r1 =>
-              r1.GetType() == typeof(Order) &&
               r1.Customer.GetType() == typeof(Customer));
             Assert.IsTrue(ok, "every Order should have a customer");
             ok = results.All(r1 => r1.Freight > 500);
@@ -396,10 +394,8 @@ namespace Test_NetClient
 
             Assert.IsTrue(results.Count() > 0);
           var ok = results.All(r1 =>
-            r1.GetType() == typeof (Dummy) && 
-            r1.Orders.Count() > 0 &&
-            // because query can return Order and InternationalOrders
-            r1.Orders.All(o => typeof (Order).IsInstanceOfType(o)));
+            r1.GetType() == typeof (Dummy) && r1.Orders.Any());
+            
             Assert.IsTrue(ok, "every Dummy should contain a collection of Orders");
             ok = results.All(r1 => r1.CompanyName.Length > 0);
             Assert.IsTrue(ok, "and should have a populated company name");
@@ -417,7 +413,7 @@ namespace Test_NetClient
             var q = new EntityQuery<Customer>().Where(c => c.CustomerID.Equals(Guid.NewGuid())); // && true);
             var rp = q.GetResourcePath();
             var r = await em1.ExecuteQuery(q);
-            Assert.IsTrue(r.Count() == 0, "should be no results");
+            Assert.IsTrue(!r.Any(), "should be no results");
 
         }
 
@@ -427,7 +423,7 @@ namespace Test_NetClient
             var q = new EntityQuery<Order>().Where(o => o.CustomerID == Guid.NewGuid()); // && true);
             var rp = q.GetResourcePath();
             var r = await em1.ExecuteQuery(q);
-            Assert.IsTrue(r.Count() == 0, "should be no results");
+            Assert.IsTrue(!r.Any(), "should be no results");
 
         }
 
@@ -453,19 +449,8 @@ namespace Test_NetClient
 
             var q0 = EntityQuery.From<Order>().Where(o => o.Freight > 100 && o.Freight < 200);
             var r0 = await q0.Execute(em1);
-            Assert.IsTrue(r0.Count() > 0);
+            Assert.IsTrue(r0.Any());
             Assert.IsTrue(r0.All(r => r.Freight > 100 && r.Freight < 200), "should match query criteria");
-        }
-
-        [TestMethod]
-        public async Task OneToOne() {
-            var em1 = await TestFns.NewEm(_serviceName);
-
-            var q0 = new EntityQuery<Order>().Where(o => o.InternationalOrder != null).Take(3).Expand("InternationalOrder");
-            var r0 = await q0.Execute(em1);
-            Assert.IsTrue(r0.Count() == 3);
-            Assert.IsTrue(r0.All(r => r.InternationalOrder != null));
-
         }
 
         [TestMethod]

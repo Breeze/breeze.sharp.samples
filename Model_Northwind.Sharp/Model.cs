@@ -269,26 +269,6 @@ namespace Northwind.Models {
       set { SetValue(value); }
     }
 
-    //public string ShipAddress {
-    //  get { return GetValue<string>(); }
-    //  set { SetValue(value); }
-    //}
-    //public string ShipCity {
-    //  get { return GetValue<string>(); }
-    //  set { SetValue(value); }
-    //}
-    //public string ShipRegion {
-    //  get { return GetValue<string>(); }
-    //  set { SetValue(value); }
-    //}
-    //public string ShipPostalCode {
-    //  get { return GetValue<string>(); }
-    //  set { SetValue(value); }
-    //}
-    //public string ShipCountry {
-    //  get { return GetValue<string>(); }
-    //  set { SetValue(value); }
-    //}
     public int RowVersion {
       get { return GetValue<int>(); }
       set { SetValue(value); }
@@ -306,11 +286,6 @@ namespace Northwind.Models {
       get { return GetValue<NavigationSet<OrderDetail>>(); }
       set { SetValue(value); }
     }
-    public InternationalOrder InternationalOrder {
-      get { return GetValue<InternationalOrder>(); }
-      set { SetValue(value); }
-    }
-
     public string CustomerName {
         get { return GetValue<string>(); }
         set { SetValue(value); }
