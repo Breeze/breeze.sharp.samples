@@ -395,10 +395,11 @@ namespace Test_NetClient
             var results = await q3.Execute(em1);
 
             Assert.IsTrue(results.Count() > 0);
-            var ok = results.All(r1 =>
-              r1.GetType() == typeof(Dummy) &&
-              r1.Orders.Count() > 0 &&
-              r1.Orders.All(o => o.GetType() == typeof(Order)));
+          var ok = results.All(r1 =>
+            r1.GetType() == typeof (Dummy) && 
+            r1.Orders.Count() > 0 &&
+            // because query can return Order and InternationalOrders
+            r1.Orders.All(o => typeof (Order).IsInstanceOfType(o)));
             Assert.IsTrue(ok, "every Dummy should contain a collection of Orders");
             ok = results.All(r1 => r1.CompanyName.Length > 0);
             Assert.IsTrue(ok, "and should have a populated company name");

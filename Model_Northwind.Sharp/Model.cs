@@ -220,7 +220,7 @@ namespace Northwind.Models {
   public partial class EmployeeTerritory : BaseEntity {
 
     public int ID { get; set; }
-    public int EmployeeID { get; set; }
+    public int EmpID { get; set; }
     public int TerritoryID { get; set; }
     public int RowVersion { get; set; }
     public Employee Employee { get; set; }
@@ -258,30 +258,37 @@ namespace Northwind.Models {
       get { return GetValue<decimal?>(); }
       set { SetValue(value); }
     }
+
+    public Location ShipTo {
+      get { return GetValue<Location>(); }
+      set { SetValue(value);}
+    }
+
     public string ShipName {
       get { return GetValue<string>(); }
       set { SetValue(value); }
     }
-    public string ShipAddress {
-      get { return GetValue<string>(); }
-      set { SetValue(value); }
-    }
-    public string ShipCity {
-      get { return GetValue<string>(); }
-      set { SetValue(value); }
-    }
-    public string ShipRegion {
-      get { return GetValue<string>(); }
-      set { SetValue(value); }
-    }
-    public string ShipPostalCode {
-      get { return GetValue<string>(); }
-      set { SetValue(value); }
-    }
-    public string ShipCountry {
-      get { return GetValue<string>(); }
-      set { SetValue(value); }
-    }
+
+    //public string ShipAddress {
+    //  get { return GetValue<string>(); }
+    //  set { SetValue(value); }
+    //}
+    //public string ShipCity {
+    //  get { return GetValue<string>(); }
+    //  set { SetValue(value); }
+    //}
+    //public string ShipRegion {
+    //  get { return GetValue<string>(); }
+    //  set { SetValue(value); }
+    //}
+    //public string ShipPostalCode {
+    //  get { return GetValue<string>(); }
+    //  set { SetValue(value); }
+    //}
+    //public string ShipCountry {
+    //  get { return GetValue<string>(); }
+    //  set { SetValue(value); }
+    //}
     public int RowVersion {
       get { return GetValue<int>(); }
       set { SetValue(value); }
@@ -350,11 +357,16 @@ namespace Northwind.Models {
 
   public partial class PreviousEmployee : BaseEntity {
 
-
     public int EmployeeID {
       get { return GetValue<int>(); }
       set { SetValue(value); }
     }
+
+    public int? ReportsToEmployeeID {
+      get { return GetValue<int?>(); }
+      set { SetValue(value); }
+    }
+
     public string LastName {
       get { return GetValue<string>(); }
       set { SetValue(value); }
@@ -742,12 +754,12 @@ namespace Northwind.Models {
     }
   }
 
-  public partial class InternationalOrder : BaseEntity {
+  public partial class InternationalOrder : Order {
 
-    public int OrderID {
-      get { return GetValue<int>(); }
-      set { SetValue(value); }
-    }
+    //public int OrderID {
+    //  get { return GetValue<int>(); }
+    //  set { SetValue(value); }
+    //}
     public string CustomsDescription {
       get { return GetValue<String>(); }
       set { SetValue(value); }
