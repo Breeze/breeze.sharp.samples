@@ -28,6 +28,22 @@ namespace Test_NetClient
         public void TearDown() {
         }
 
+        [TestMethod]
+        public async Task RequerySameEntity() {
+          var entityManager = await TestFns.NewEm(_serviceName);
+
+          // Orders with freight cost over 100.
+          var query = new EntityQuery<Order>().Where(o => o.Freight > 100);
+          var orders100 = await entityManager.ExecuteQuery(query);
+          Assert.IsTrue(orders100.Any(), "There should be orders with freight cost > 100");
+
+          var query2 = new EntityQuery<Order>().Where(o => o.Freight > 50);
+          var orders50 = await entityManager.ExecuteQuery(query2);
+          Assert.IsTrue(orders50.Any(), "There should be orders with freight cost > 50");
+
+          Assert.IsTrue(orders50.Count() >= orders100.Count(), "There should be more orders with freight > 50 than 100");
+        }
+
 
         //*********************************************************
         // All customers - "Concise" style
