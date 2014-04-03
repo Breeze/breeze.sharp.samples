@@ -31,14 +31,14 @@ namespace Test_NetClient
         public void TearDown() {
         }
 
-        //*********************************************************
-        // Metadata necessary to get entity key
-        // Must be first test, since CanFetchMetadata() below fetches 
-        // metadata into static instance of MetadataStore
-        //
-        //*********************************************************
+        #region Metadata
+
         [TestMethod]
         public void MetadataNeededToGetEntityKey() {
+
+            // Metadata is necessary to get entity key
+            // Must be first test to be meaningful, since CanFetchMetadata() below fetches 
+            // metadata into the static instance of MetadataStore
             var entityManager = new EntityManager(_serviceName);
             var customerType = MetadataStore.Instance.GetEntityType(typeof(Customer));
             Assert.IsNotNull(customerType);
@@ -52,80 +52,38 @@ namespace Test_NetClient
             }
         }
 
-        //*********************************************************
-        // Confirm the metadata can be fetched from the server
-        //
-        //*********************************************************
         [TestMethod]
         public async Task CanGetMetadata() {
+            
+            // Confirm the metadata can be fetched from the server
             var entityManager = new EntityManager(_serviceName);
             var dataService = await entityManager.FetchMetadata();
             Assert.IsNotNull(dataService);
         }
 
-        //*********************************************************
-        // Fetch same entity twice
-        //
-        //*********************************************************
-        [TestMethod]
-        public async Task CanFetchEntityTwice() {
-            var entityManager = new EntityManager(_serviceName);
-            await entityManager.FetchMetadata();
-            var customerType = MetadataStore.Instance.GetEntityType(typeof(Customer));
+        #endregion Metadata
 
-            var key = new EntityKey(customerType, _alfredsID);
-
-            var result = await entityManager.FetchEntityByKey(key);
-            Assert.IsNotNull(result.Entity, "Entity fetched by key should not be null");
-            Assert.IsFalse(result.FromCache, "Entity fetched remotely should not be from cache");
-
-            result = await entityManager.FetchEntityByKey(key);
-            Assert.IsNotNull(result.Entity, "Entity re-fetched by key should not be null");
-            Assert.IsFalse(result.FromCache, "Entity re-fetched remotely should not be from cache");
-        }
-
-        //*********************************************************
-        // Query entity twice
-        //
-        //*********************************************************
-        [TestMethod]
-        public async Task QueryEntityTwice() {
-            var entityManager = new EntityManager(_serviceName);
-            await entityManager.FetchMetadata();
-
-            var query1 = new EntityQuery<Customer>().Where(c => c.CustomerID == _alfredsID);
-            var alfred1 = (await entityManager.ExecuteQuery(query1)).FirstOrDefault();
-            Assert.IsNotNull(alfred1, "Alfred should be found by Id");
-
-            var query2 = new EntityQuery<Customer>().Where(c => c.CompanyName == alfred1.CompanyName);
-            var alfred2 = (await entityManager.ExecuteQuery(query2)).FirstOrDefault();
-            Assert.IsTrue(ReferenceEquals(alfred1, alfred2), "Successive queried should return same entity");
-        }
-
-        //*********************************************************
-        // Query all instances of an entity (Customer)
-        // Execute the query via a test helper method that encapsulates the ceremony
-        //
-        //*********************************************************
+        #region Basic queries
 
         [TestMethod]
         public async Task AllCustomers_Concise()
         {
+            // All instances of Customer
             var query = EntityQuery.From<Customer>();                       // One way to create a basic EntityQuery
+            
+            // Execute the query via a test helper method that encapsulates the ceremony
             await TestFns.VerifyQuery(query, _serviceName, "All customers");
         }
 
-        //*********************************************************
-        // Query all instances of an entity (Customer)
-        // Handle async Task results explicitly
-        //
-        //*********************************************************
-        
         [TestMethod]
         public async Task AllCustomers_Task()
         {
-            var query = new EntityQuery<Customer>();                        // Alternate way to create a basic EntityQuery
             var entityManager = new EntityManager(_serviceName);
+            
+            // All instances of Customer
+            var query = new EntityQuery<Customer>();                        // Alternate way to create a basic EntityQuery
+            
+            // Handle async Task results explicitly
             await entityManager.ExecuteQuery(query).ContinueWith(task =>
                 {
                     if (task.IsFaulted) {
@@ -138,17 +96,15 @@ namespace Test_NetClient
                     }
                 });
         }
-
-        //*********************************************************
-        // Query all instances of an entity (Customer)
-        // Capture result using try-catch
-        //
-        //*********************************************************
-        
+      
         [TestMethod]
         public async Task AllCustomers_Exceptions() {
-            var query = new EntityQuery<Customer>(); 
             var entityManager = new EntityManager(_serviceName);
+            
+            // All instances of Customer
+            var query = new EntityQuery<Customer>(); 
+            
+            // Capture result using try-catch
             try {
                 var results = await entityManager.ExecuteQuery(query);
                 var count = results.Count();
@@ -159,17 +115,15 @@ namespace Test_NetClient
             }
         }
 
-        //*********************************************************
-        // Query an entity (Supplier) which holds a complex type (Location)
-        //
-        //*********************************************************
-
         [TestMethod]
         public async Task ComplexType() {
             try {
                 var entityManager = await TestFns.NewEm(_serviceName);
-                var data = await EntityQuery.From<Supplier>().Take(1).Execute(entityManager);
-                var supplier = data.FirstOrDefault();
+
+                // Query an entity (Supplier) which holds a complex type (Location)
+                var suppliers = await EntityQuery.From<Supplier>().Take(1).Execute(entityManager);
+
+                var supplier = suppliers.FirstOrDefault();
                 Assert.IsNotNull(supplier, "Supplier should be non-null");
                 Assert.IsNotNull(supplier.Location, "Supplier location should be non-null");
                 Assert.IsFalse(string.IsNullOrEmpty(supplier.Location.Address), "Supplier address should be non-null and not empty");
@@ -180,10 +134,39 @@ namespace Test_NetClient
             }
         }
 
-        //*********************************************************
-        // Requerying same entity
-        //
-        //*********************************************************
+        [TestMethod]
+        public async Task CanFetchEntityTwice() {
+            var entityManager = new EntityManager(_serviceName);
+            await entityManager.FetchMetadata();
+            
+            var customerType = MetadataStore.Instance.GetEntityType(typeof(Customer));
+            var key = new EntityKey(customerType, _alfredsID);
+
+            // Fetch same entity twice
+            var result = await entityManager.FetchEntityByKey(key);
+            Assert.IsNotNull(result.Entity, "Entity fetched by key should not be null");
+            Assert.IsFalse(result.FromCache, "Entity fetched remotely should not be from cache");
+
+            result = await entityManager.FetchEntityByKey(key);
+            Assert.IsNotNull(result.Entity, "Entity re-fetched by key should not be null");
+            Assert.IsFalse(result.FromCache, "Entity re-fetched remotely should not be from cache");
+        }
+
+        [TestMethod]
+        public async Task QueryEntityTwice() {
+            var entityManager = new EntityManager(_serviceName);
+            await entityManager.FetchMetadata();
+
+            // Query entity twice
+            var query1 = new EntityQuery<Customer>().Where(c => c.CustomerID == _alfredsID);
+            var alfred1 = (await entityManager.ExecuteQuery(query1)).FirstOrDefault();
+            Assert.IsNotNull(alfred1, "Alfred should be found by Id");
+
+            var query2 = new EntityQuery<Customer>().Where(c => c.CompanyName == alfred1.CompanyName);
+            var alfred2 = (await entityManager.ExecuteQuery(query2)).FirstOrDefault();
+            Assert.IsTrue(ReferenceEquals(alfred1, alfred2), "Successive queried should return same entity");
+        }
+
         [TestMethod]
         public async Task RequerySameEntity() {
             var entityManager = await TestFns.NewEm(_serviceName);
@@ -193,6 +176,7 @@ namespace Test_NetClient
             var orders100 = await entityManager.ExecuteQuery(query);
             Assert.IsTrue(orders100.Any(), "There should be orders with freight cost > 100");
 
+            // Requerying same entity
             var query2 = new EntityQuery<Order>().Where(o => o.Freight > 50);
             var orders50 = await entityManager.ExecuteQuery(query2);
             Assert.IsTrue(orders50.Any(), "There should be orders with freight cost > 50");
@@ -200,10 +184,10 @@ namespace Test_NetClient
             Assert.IsTrue(orders50.Count() >= orders100.Count(), "There should be more orders with freight > 50 than 100");
         }
 
-        //*********************************************************
-        // Queries involving single conditions
-        //
-        //*********************************************************
+        #endregion Basic queries
+
+        #region Simple single condition queries
+
         [TestMethod]
         public async Task SingleConditions() {
             try {
@@ -220,17 +204,11 @@ namespace Test_NetClient
                 var orders = await entityManager.ExecuteQuery(query2);
                 Assert.IsTrue(orders.Any(), "There should be orders with freight cost > 100");
 
-                //// Temporarily use a new entity manager
-                //entityManager = new EntityManager(_serviceName);
-
                 // Orders placed on or after 1/1/1998.
                 var testDate = new DateTime(1998, 1, 3);
                 var query3 = new EntityQuery<Order>().Where(o => o.OrderDate >= testDate);
                 orders = await entityManager.ExecuteQuery(query3);
                 Assert.IsTrue(orders.Any(), "There should be orders placed after 1/1/1998");
-
-                //// Temporarily use a new entity manager
-                //entityManager = new EntityManager(_serviceName);
 
                 // Orders placed on 1/1/1998.
                 var query4 = new EntityQuery<Order>().Where(o => o.OrderDate == testDate);
@@ -243,47 +221,33 @@ namespace Test_NetClient
             }
         }
 
-        //*********************************************************
-        // Queries involving expansion to related entities
-        //
-        //*********************************************************
+        #endregion Simple single condition queries
+
+        #region Expansion to related entities
 
         [TestMethod]
         public async Task Expansions() {
 
-            // Alfreds orders expanded with their OrderDetails
             try {
                 var entityManager = await TestFns.NewEm(_serviceName);
 
-                var query = new EntityQuery<Order>().Where(o => o.CustomerID == _alfredsID).Expand("OrderDetails");
-                var orders = await entityManager.ExecuteQuery(query);
+                EntityQuery<Order> query;
+                IEnumerable<Order> orders;
+
+                // Alfreds orders expanded with their OrderDetails
+                query = new EntityQuery<Order>().Where(o => o.CustomerID == _alfredsID).Expand("OrderDetails");
+                orders = await entityManager.ExecuteQuery(query);
                 AssertGotOrderDetails(entityManager, orders);
-            } 
-            catch (Exception e) {
-                var message = TestFns.FormatException(e);
-                Assert.Fail(message);
-            }
 
-            // Alfreds orders expanded with their parent Customers and OrderDetails 
-            try {
-                var entityManager = await TestFns.NewEm(_serviceName);
-
-                var query = new EntityQuery<Order>().Where(o => o.CustomerID == _alfredsID).Expand("Customer").Expand("OrderDetails");
-                var orders = await entityManager.ExecuteQuery(query);
+                // Alfreds orders expanded with their parent Customers and OrderDetails 
+                query = new EntityQuery<Order>().Where(o => o.CustomerID == _alfredsID).Expand("Customer").Expand("OrderDetails");
+                orders = await entityManager.ExecuteQuery(query);
                 AssertGotOrderDetails(entityManager, orders);
                 AssertGotCustomerByExpand(entityManager, orders);
-            } 
-            catch (Exception e) {
-                var message = TestFns.FormatException(e);
-                Assert.Fail(message);
-            }
 
-            // Alfreds orders, including their OrderDetails, and the Products of those details, 
-            try {
-                var entityManager = await TestFns.NewEm(_serviceName);
-
-                var query = new EntityQuery<Order>().Where(o => o.CustomerID == _alfredsID).Expand("Customer").Expand("OrderDetails.Product");
-                var orders = await entityManager.ExecuteQuery(query);
+                // Alfreds orders, including their OrderDetails, and the Products of those details, 
+                query = new EntityQuery<Order>().Where(o => o.CustomerID == _alfredsID).Expand("Customer").Expand("OrderDetails.Product");
+                orders = await entityManager.ExecuteQuery(query);
                 AssertGotOrderDetails(entityManager, orders);
                 AssertGotCustomerByExpand(entityManager, orders);
                 AssertGotProductsByExpand(entityManager, orders);
@@ -299,8 +263,8 @@ namespace Test_NetClient
 
                 var query = new EntityQuery<Product>().Take(1).Expand("Supplier");
                 var products = await entityManager.ExecuteQuery(query);
-                var product = products.FirstOrDefault();
-                Assert.IsNotNull(product, "A product should be returned");
+                Assert.IsTrue(products.Any(), "A product should be returned");
+                var product = products.First();
                 Assert.IsNotNull(product.Supplier, "A product should have a supplier");
             }
             catch (Exception e) {
@@ -336,41 +300,132 @@ namespace Test_NetClient
 
         private void AssertGotProductsByExpand(EntityManager entityManager, IEnumerable<Order> orders)
         {
-            var firstOrder = orders.FirstOrDefault();
-            Assert.IsNotNull(firstOrder, "There should be at least one order returned");
-            var firstOrderDetail = firstOrder.OrderDetails.FirstOrDefault();
-            Assert.IsNotNull(firstOrderDetail, "There should be at least one order detail returned");
+            Assert.IsTrue(orders.Any(), "There should be at least one order returned");
+            var firstOrder = orders.First();
+
+            Assert.IsTrue(firstOrder.OrderDetails.Any(), "There should be at least one order detail returned");
+            var firstOrderDetail = firstOrder.OrderDetails.First();
             Assert.IsNotNull(firstOrderDetail.Product, "Related product should be returned");
         }
 
-        //*********************************************************
-        // Queries using specialized server controller methods
-        //
-        //*********************************************************
+        #endregion Expansion to related entities
+
+        #region Ordering and Paging
 
         [TestMethod]
-        public async Task SpecializedMethods() {
+        public async Task OrderingAndPaging() {
+            var entityManager = await TestFns.NewEm(_serviceName);
+            EntityQuery<Product> query;
+            IEnumerable<Product> products;
+
             try {
-                var entityManager = await TestFns.NewEm(_serviceName);
+                // Products sorted by name
+                query = new EntityQuery<Product>().Expand("Category").OrderBy(p => p.ProductName);
+                products = await entityManager.ExecuteQuery(query);
+                VerifyProductResults(products);
 
-                // CustomersAsHRM returns an HTTPResponseMessage
-                // can filter, select, and expand 
-                var query = EntityQuery.From<Customer>("CustomersAsHRM")
-                                       .Where(c => c.CustomerID == _alfredsID)
-                                       .Select(c => new {
-                                           CustomerID = c.CustomerID,
-                                           CompanyName = c.CompanyName,
-                                       });
-                var items = await entityManager.ExecuteQuery(query);
-                Assert.IsTrue(items.Count() == 1, "Should return one customer projection item");
-                var item = items.FirstOrDefault();
+                // Products sorted by name in descending order
+                query = new EntityQuery<Product>().Expand("Category").OrderByDescending(p => p.ProductName);
+                products = await entityManager.ExecuteQuery(query);
+                VerifyProductResults(products);
 
+                // Products sorted by price descending, then name ascending
+                query = new EntityQuery<Product>().Expand("Category").OrderBy(p => p.ProductName).OrderByDescending(p => p.ProductName);
+                products = await entityManager.ExecuteQuery(query);
+                VerifyProductResults(products);
+
+                // look in results for ...
+                //    (27) 'Schoggi Schokolade' at $43.9 in 'Confections', 
+                //    (63) 'Vegie-spread' at $43.9 in 'Condiments',...
+
+                // Products sorted by related category descending
+                query = new EntityQuery<Product>().Expand("Category").OrderByDescending(p => p.Category.CategoryName);
+                products = await entityManager.ExecuteQuery(query);
+                VerifyProductResults(products);
+
+                // First 5 of products ordered by product name, then expanded to related category
+                query = new EntityQuery<Product>().OrderBy(p => p.ProductName).Take(5).Expand("Category");
+                products = await entityManager.ExecuteQuery(query);
+                VerifyProductResults(products);
+
+                // Skip first 10 of products ordered by product name, then expanded to related category
+                query = new EntityQuery<Product>().OrderBy(p => p.ProductName).Skip(10).Expand("Category");
+                products = await entityManager.ExecuteQuery(query);
+                VerifyProductResults(products);
+
+                // Products paging with skip and take
+                query = new EntityQuery<Product>().OrderBy(p => p.ProductName).Skip(10).Take(5).Expand("Category");
+                products = await entityManager.ExecuteQuery(query);
+                VerifyProductResults(products);
+
+                // Inline count of paged products
+                var productQuery = new EntityQuery<Product>().Where(p => p.ProductName.StartsWith("C"));
+                var pagedQuery = productQuery.OrderBy(p => p.ProductName).Skip(5).Take(5).InlineCount();
+
+                // Execute in parallel and verify products received
+                var productTask = entityManager.ExecuteQuery(productQuery);
+                var pagedTask = entityManager.ExecuteQuery(pagedQuery);
+                await Task.WhenAll(productTask, pagedTask);
+
+                var productCount        = productTask.Result.Count();
+                var pageCount          = pagedTask.Result.Count();
+                var pagedQueryResult    = pagedTask.Result as QueryResult<Product>;
+                var inlineCount         = pagedQueryResult.InlineCount;
+
+                Assert.AreEqual(productCount, inlineCount, "Inline count should return item count excluding skip/take");
+                Assert.IsTrue(pageCount <= productCount, "Paged query should return subset of total query");
             }
             catch (Exception e) {
                 var message = TestFns.FormatException(e);
                 Assert.Fail(message);
             }
         }
+
+
+    private void VerifyProductResults(IEnumerable<Product> products) {
+        var limit = 15;
+        var count = products.Count();
+        var results = limit < count ? products.Take(limit) : products;
+        results.ForEach(p =>
+            Console.WriteLine(string.Format("({0}) '{1}' at ${2} in '{3}'",
+                                            p.ProductID, p.ProductName, 
+                                            p.UnitPrice, p.Category.CategoryName)));
+        if (count > results.Count()) { 
+            Console.WriteLine("..."); 
+        }
+    }
+
+    #endregion Ordering and Paging
+
+    #region Using specialized server controller methods
+
+    [TestMethod]
+    public async Task SpecializedMethods() {
+        try {
+            var entityManager = await TestFns.NewEm(_serviceName);
+
+            // CustomersAsHRM returns an HTTPResponseMessage
+            // can filter, select, and expand 
+            var query = EntityQuery.From<Customer>("CustomersAsHRM")
+                                   .Where(c => c.CustomerID == _alfredsID)
+                                   .Select(c => new
+                                   {
+                                       CustomerID = c.CustomerID,
+                                       CompanyName = c.CompanyName,
+                                   });
+            var items = await entityManager.ExecuteQuery(query);
+            Assert.IsTrue(items.Count() == 1, "Should return one customer projection item");
+            var item = items.FirstOrDefault();
+
+        }
+        catch (Exception e) {
+            var message = TestFns.FormatException(e);
+            Assert.Fail(message);
+        }
+    }
+
+    #endregion Using specialized server controller methods
+
 
 
 //=======================================================================================================================================
