@@ -31,23 +31,6 @@ namespace Test_NetClient
         public void TearDown() {
         }
 
-        [TestMethod]
-        public async Task RequerySameEntity() {
-          var entityManager = await TestFns.NewEm(_serviceName);
-
-          // Orders with freight cost over 100.
-          var query = new EntityQuery<Order>().Where(o => o.Freight > 100);
-          var orders100 = await entityManager.ExecuteQuery(query);
-          Assert.IsTrue(orders100.Any(), "There should be orders with freight cost > 100");
-
-          var query2 = new EntityQuery<Order>().Where(o => o.Freight > 50);
-          var orders50 = await entityManager.ExecuteQuery(query2);
-          Assert.IsTrue(orders50.Any(), "There should be orders with freight cost > 50");
-
-          Assert.IsTrue(orders50.Count() >= orders100.Count(), "There should be more orders with freight > 50 than 100");
-        }
-
-
         //*********************************************************
         // Metadata necessary to get entity key
         // Must be first test, since CanFetchMetadata() below fetches 
@@ -55,7 +38,7 @@ namespace Test_NetClient
         //
         //*********************************************************
         [TestMethod]
-        public async Task MetadataNeededToGetEntityKey() {
+        public void MetadataNeededToGetEntityKey() {
             var entityManager = new EntityManager(_serviceName);
             var customerType = MetadataStore.Instance.GetEntityType(typeof(Customer));
             Assert.IsNotNull(customerType);
@@ -65,8 +48,7 @@ namespace Test_NetClient
                 Assert.Fail("EntityKey constructor should fail if metadata not fetched");
             }
             catch (Exception e) {
-                Assert.IsTrue(e is ArgumentOutOfRangeException, "Thrown exception should be ArgumentOutOfRangeException.  Type = " + e.GetType().Name + ": " + e.Message);
-                Assert.Fail("Missing metadata should throw with more informative message");
+                Assert.IsTrue(e.Message.Contains("There are no KeyProperties yet defined"), "Thrown exception should indicated key property is not defined");
             }
         }
 
@@ -218,7 +200,6 @@ namespace Test_NetClient
             Assert.IsTrue(orders50.Count() >= orders100.Count(), "There should be more orders with freight > 50 than 100");
         }
 
-
         //*********************************************************
         // Queries involving single conditions
         //
@@ -239,8 +220,8 @@ namespace Test_NetClient
                 var orders = await entityManager.ExecuteQuery(query2);
                 Assert.IsTrue(orders.Any(), "There should be orders with freight cost > 100");
 
-                // Temporarily use a new entity manager
-                entityManager = new EntityManager(_serviceName);
+                //// Temporarily use a new entity manager
+                //entityManager = new EntityManager(_serviceName);
 
                 // Orders placed on or after 1/1/1998.
                 var testDate = new DateTime(1998, 1, 3);
@@ -248,8 +229,8 @@ namespace Test_NetClient
                 orders = await entityManager.ExecuteQuery(query3);
                 Assert.IsTrue(orders.Any(), "There should be orders placed after 1/1/1998");
 
-                // Temporarily use a new entity manager
-                entityManager = new EntityManager(_serviceName);
+                //// Temporarily use a new entity manager
+                //entityManager = new EntityManager(_serviceName);
 
                 // Orders placed on 1/1/1998.
                 var query4 = new EntityQuery<Order>().Where(o => o.OrderDate == testDate);
