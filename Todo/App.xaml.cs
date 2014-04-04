@@ -28,6 +28,7 @@ namespace Todo_Net
 
             // Create the Breeze entity manager
             var serviceAddress = "http://localhost:63030/breeze/Todos/";
+            //var serviceAddress = "http://sampleservice.breezejs.com/api/todos/";
             var assembly = typeof(TodoItem).Assembly;
             var rslt = MetadataStore.Instance.ProbeAssemblies(assembly);
             var entityManager = new EntityManager(serviceAddress);

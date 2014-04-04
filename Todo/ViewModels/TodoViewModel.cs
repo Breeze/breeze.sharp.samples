@@ -221,7 +221,7 @@ namespace Todo_Net
                         data.Add(parameterName, p as string);
                     });
                 try {
-                    var serviceAddress = _em.DefaultDataService.ServiceName;
+                    var serviceAddress = _em.DataService.ServiceName;
                     response = webClient.UploadValues(serviceAddress + "/" + functionName, "POST", data);
                     responseString = Encoding.Default.GetString(response);
                     return true;

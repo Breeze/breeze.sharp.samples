@@ -103,12 +103,14 @@
                                    FontWeight="Bold"
                                    Watermark="What needs to be done?" 
                                    Text="{Binding NewTodoDescription, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"
-                                   TextWrapping="Wrap" />
+                                   TextWrapping="Wrap" 
+                                   KeyDown="WatermarkTextBox_KeyDown" />
 
             <!-- Controls -->
             <StackPanel Grid.Row="3" 
                         Orientation="Horizontal">
-                <Button Margin="10"
+                <Button x:Name="markAllAsDoneButton" 
+                        Margin="10"
                         Command="{Binding MarkAllAsDoneCommand}">
                     <TextBlock FontWeight="Bold"
                                FontSize="14"
@@ -124,7 +126,8 @@
             </StackPanel>
 
             <!-- The main todo list -->
-            <ListView Grid.Row="4" 
+            <ListView Grid.Row="4"
+                      x:Name="itemsListView"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ItemsSource="{Binding Items}"
                       SelectedItem="{Binding SelectedItem}">
@@ -195,7 +198,8 @@
                                          FontWeight="Bold"
                                          Text="{Binding Description, ValidatesOnDataErrors=True, NotifyOnValidationError=True}" 
                                          TextWrapping="Wrap"
-                                         Style="{StaticResource VisibleIfSelected}" />
+                                         Style="{StaticResource VisibleIfSelected}" 
+                                         KeyDown="TextBox_KeyDown" />
                             </Grid>
                         </Border>
                     </DataTemplate>

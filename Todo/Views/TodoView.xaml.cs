@@ -25,5 +25,19 @@ namespace Todo_Net
             InitializeComponent();
         }
 
+        private void WatermarkTextBox_KeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Return) {
+                // Move focus to MarkAllAsDone button
+                markAllAsDoneButton.Focus();
+            }
+        }
+
+        private void TextBox_KeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Return) {
+                // Move focus to the list view
+                itemsListView.Focus();
+            }
+        }
+
     }
 }
