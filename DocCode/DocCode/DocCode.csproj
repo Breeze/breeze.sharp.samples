@@ -56,7 +56,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Breeze.sharp\Breeze.Sharp\Breeze.Sharp.csproj">
+    <ProjectReference Include="..\..\..\breeze.sharp\Breeze.Sharp\Breeze.Sharp.csproj">
       <Project>{54b1ce10-2847-4565-839a-26da3a51af38}</Project>
       <Name>Breeze.Sharp</Name>
     </ProjectReference>

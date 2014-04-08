@@ -34,6 +34,19 @@ namespace Test_NetClient
         #region Metadata
 
         [TestMethod]
+        public async Task Projection() {
+          try {
+            var entityManager = await TestFns.NewEm(_serviceName);
+            var productNames = await new EntityQuery<Product>().Select(p => new {p.ProductName}).Execute(entityManager);
+            Assert.IsTrue(productNames.Any(), "Projection query should return items");
+          } catch (Exception e) {
+            var message = TestFns.FormatException(e);
+            Assert.Fail(message);
+          }
+        }
+
+
+        [TestMethod]
         public void MetadataNeededToGetEntityKey() {
 
             // Metadata is necessary to get entity key

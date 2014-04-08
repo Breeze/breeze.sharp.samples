@@ -190,7 +190,7 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  
   <PropertyGroup>
     <PreBuildEvent>
       IF EXIST "$(ProjectDir)..\..\..\Breeze.Client\Scripts\breeze.debug.js" GOTO breezeExists
