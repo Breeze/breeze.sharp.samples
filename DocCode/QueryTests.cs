@@ -397,6 +397,23 @@ namespace Test_NetClient
 
     #endregion Ordering and Paging
 
+    #region Projection
+
+    [TestMethod]
+    public async Task Projection() {
+        try {
+            var entityManager = await TestFns.NewEm(_serviceName);
+            var productNames = await new EntityQuery<Product>().Select(p => p.ProductName).Execute(entityManager);
+            Assert.IsTrue(productNames.Any(), "Projection query should return items");
+        }
+        catch (Exception e) {
+            var message = TestFns.FormatException(e);
+            Assert.Fail(message);
+        }
+    }
+
+    #endregion Projection
+
     #region Using specialized server controller methods
 
     [TestMethod]
