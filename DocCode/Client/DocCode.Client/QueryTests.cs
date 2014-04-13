@@ -33,18 +33,7 @@ namespace Test_NetClient
 
         #region Metadata
 
-        [TestMethod]
-        public async Task Projection() {
-          try {
-            var entityManager = await TestFns.NewEm(_serviceName);
-            var productNames = await new EntityQuery<Product>().Select(p => new {p.ProductName}).Execute(entityManager);
-            Assert.IsTrue(productNames.Any(), "Projection query should return items");
-          } catch (Exception e) {
-            var message = TestFns.FormatException(e);
-            Assert.Fail(message);
-          }
-        }
-
+       
 
         [TestMethod]
         public void MetadataNeededToGetEntityKey() {
@@ -412,18 +401,22 @@ namespace Test_NetClient
 
     #region Projection
 
+   
+
     [TestMethod]
     public async Task Projection() {
-        try {
-            var entityManager = await TestFns.NewEm(_serviceName);
-            var productNames = await new EntityQuery<Product>().Select(p => p.ProductName).Execute(entityManager);
-            Assert.IsTrue(productNames.Any(), "Projection query should return items");
-        }
-        catch (Exception e) {
-            var message = TestFns.FormatException(e);
-            Assert.Fail(message);
-        }
+      try {
+        var entityManager = await TestFns.NewEm(_serviceName);
+        // Next line does not work because of MS OData restrictions.
+        // var productNames = await new EntityQuery<Product>().Select(p => p.ProductName).Execute(entityManager);
+        var productNames = await new EntityQuery<Product>().Select(p => new { p.ProductName }).Execute(entityManager);
+        Assert.IsTrue(productNames.Any(), "Projection query should return items");
+      } catch (Exception e) {
+        var message = TestFns.FormatException(e);
+        Assert.Fail(message);
+      }
     }
+
 
     #endregion Projection
 
@@ -885,236 +878,7 @@ namespace Test_NetClient
 
         }
 
-        //test("query with take, orderby and expand", function () {
-        //    if (testFns.DEBUG_MONGO) {
-        //        ok(true, "NA for Mongo - expand not yet supported");
-        //        return;
-        //    }
-        //    var em = newEm();
-        //    var q1 = EntityQuery.from("Products")
-        //        .expand("category")
-        //        .orderBy("category.categoryName desc, productName");
-        //    stop();
-        //    var topTen;
-        //    em.executeQuery(q1).then(function (data) {
-        //        topTen = data.results.slice(0, 10);
-        //        var q2 = q1.take(10);
-        //        return em.executeQuery(q2);
-        //    }).then(function (data2) {
-        //        var topTenAgain = data2.results;
-        //        for(var i=0; i<10; i++) {
-        //            ok(topTen[i] === topTenAgain[i]);
-        //        }
-        //    }).fail(testFns.handleFail).fin(start);
 
-        //});
-
-
-        //test("query with take, skip, orderby and expand", function () {
-        //    if (testFns.DEBUG_MONGO) {
-        //        ok(true, "NA for Mongo - expand not yet supported");
-        //        return;
-        //    }
-
-        //    var em = newEm();
-        //    var q1 = EntityQuery.from("Products")
-        //        .expand("category")
-        //        .orderBy("category.categoryName, productName");
-        //    stop();
-        //    var nextTen;
-        //    em.executeQuery(q1).then(function (data) {
-        //        nextTen = data.results.slice(10, 20);
-        //        var q2 = q1.skip(10).take(10);
-        //        return em.executeQuery(q2);
-        //    }).then(function (data2) {
-        //        var nextTenAgain = data2.results;
-        //        for (var i = 0; i < 10; i++) {
-        //            ok(nextTen[i] === nextTenAgain[i], extractDescr(nextTen[i]) + " -- " + extractDescr(nextTenAgain[i]));
-        //        }
-        //    }).fail(testFns.handleFail).fin(start);
-
-        //});
-
-        //function extractDescr(product) {
-        //    var cat =  product.getProperty("category");
-        //    return cat && cat.getProperty("categoryName") + ":" + product.getProperty("productName");
-        //}
-
-        //test("query with quotes", function () {
-        //    var em = newEm();
-
-        //    var q = EntityQuery.from("Customers")
-        //        .where("companyName", 'contains', "'")
-        //        .using(em);
-        //    stop();
-
-        //    q.execute().then(function (data) {
-        //        ok(data.results.length > 0);
-        //        var r = em.executeQueryLocally(q);
-        //        ok(r.length === data.results.length, "local query should return same subset");
-        //    }).fail(testFns.handleFail).fin(start);
-
-        //});
-
-        //test("bad query test", function () {
-        //    var em = newEm();
-
-        //    var q = EntityQuery.from("EntityThatDoesnotExist")
-        //        .using(em);
-        //    stop();
-
-        //    q.execute().then(function (data) {
-        //        ok(false, "should not get here");
-        //    }).fail(function (e) {
-        //        ok(e.message && e.message.toLowerCase().indexOf("entitythatdoesnotexist") >= 0, e.message);
-        //    }).fin(function(x) {
-        //        start();
-        //    });
-        //});
-
-
-
-
-        //test("OData predicate - add combined with regular predicate", function () {
-        //    if (testFns.DEBUG_MONGO) {
-        //        ok(true, "Mongo does not yet support the 'add' OData predicate");
-        //        return;
-        //    }
-        //    var manager = newEm();
-        //    var predicate = Predicate.create("EmployeeID add ReportsToEmployeeID gt 3").and("employeeID", "<", 9999);
-
-        //    var query = new breeze.EntityQuery()
-        //        .from("Employees")
-        //        .where(predicate);
-        //    stop();
-        //    manager.executeQuery(query).then(function (data) {
-        //        ok(data.results.length > 0, "there should be records returned");
-        //        try {
-        //            manager.executeQueryLocally(query);
-        //            ok(false, "shouldn't get here");
-        //        } catch (e) {
-        //            ok(e, "should throw an exception");
-        //        }
-        //    }).fail(testFns.handleFail).fin(start);
-        //});
-
-
-
-        //test("select with inlinecount", function () {
-        //    var manager = newEm();
-        //    var query = new breeze.EntityQuery()
-        //        .from("Customers")
-        //        .select("companyName, region, city")
-        //        .inlineCount();
-        //    stop();
-        //    manager.executeQuery(query).then(function (data) {
-        //        ok(data.results.length == data.inlineCount, "inlineCount should match return count");
-
-        //    }).fail(testFns.handleFail).fin(start);
-        //});
-
-        //test("select with inlinecount and take", function () {
-        //    var manager = newEm();
-        //    var query = new breeze.EntityQuery()
-        //        .from("Customers")
-        //        .select("companyName, region, city")
-        //        .take(5)
-        //        .inlineCount();
-        //    stop();
-        //    manager.executeQuery(query).then(function (data) {
-        //        ok(data.results.length == 5, "should be 5 records returned");
-        //        ok(data.inlineCount > 5, "should have an inlinecount > 5");
-        //    }).fail(testFns.handleFail).fin(start);
-        //});
-
-        //test("select with inlinecount and take and orderBy", function () {
-        //    var manager = newEm();
-        //    var query = new breeze.EntityQuery()
-        //        .from("Customers")
-        //        .select("companyName, region, city")
-        //        .orderBy("city, region")
-        //        .take(5)
-        //        .inlineCount();
-        //    stop();
-        //    manager.executeQuery(query).then(function (data) {
-        //        ok(data.results.length == 5, "should be 5 records returned");
-        //        ok(data.inlineCount > 5, "should have an inlinecount > 5");
-        //    }).fail(testFns.handleFail).fin(start);
-        //});
-
-
-        //test("expand not working with paging or inlinecount", function () {
-        //    var manager = newEm();
-        //    var predicate = Predicate.create(testFns.orderKeyName, "<", 10500);
-        //    stop();
-        //    var query = new breeze.EntityQuery()
-        //        .from("Orders")
-        //        .expand("orderDetails, orderDetails.product")
-        //        .where(predicate)
-        //        .inlineCount()
-        //        .orderBy("orderDate")
-        //        .take(2)
-        //        .skip(1)
-        //        .using(manager)
-        //        .execute()
-        //        .then(function (data) {
-        //            ok(data.inlineCount > 0, "should have an inlinecount");
-
-        //            var localQuery = breeze.EntityQuery
-        //                .from('OrderDetails');
-
-        //            // For ODATA this is a known bug: https://aspnetwebstack.codeplex.com/workitem/1037
-        //            // having to do with mixing expand and inlineCount 
-        //            // it sounds like it might already be fixed in the next major release but not yet avail.
-
-        //            var orderDetails = manager.executeQueryLocally(localQuery);
-        //            ok(orderDetails.length > 0, "should not be empty");
-
-        //            var localQuery2 = breeze.EntityQuery
-        //                .from('Products');
-
-        //            var products = manager.executeQueryLocally(localQuery2);
-        //            ok(products.length > 0, "should not be empty");
-        //        }).fail(testFns.handleFail).fin(start);
-        //});
-
-        //test("test date in projection", function () {
-
-        //    var manager = newEm();
-        //    var query = new breeze.EntityQuery()
-        //        .from("Orders")
-        //        .where("orderDate", "!=", null)
-        //        .orderBy("orderDate")
-        //        .take(3);
-
-        //    var orderDate;
-        //    var orderDate2;
-        //    stop();
-        //    manager.executeQuery(query).then(function (data) {
-        //        var result = data.results[0];
-        //        orderDate = result.getProperty("orderDate");
-        //        ok(core.isDate(orderDate), "orderDate should be of 'Date type'");
-        //        var manager2 = newEm();
-        //        var query = new breeze.EntityQuery()
-        //            .from("Orders")
-        //            .where("orderDate", "!=", null)
-        //            .orderBy("orderDate")
-        //            .take(3)
-        //            .select("orderDate");
-        //        return manager2.executeQuery(query);
-        //    }).then(function (data2) {
-        //        orderDate2 = data2.results[0].orderDate;
-        //        if (testFns.DEBUG_ODATA) {
-        //            ok(core.isDate(orderDate2), "orderDate2 is not a date - ugh'");
-        //            var orderDate2a = orderDate2;
-        //        } else {
-        //            ok(!core.isDate(orderDate2), "orderDate pojection should not be a date except with ODATA'");
-        //            var orderDate2a = breeze.DataType.parseDateFromServer(orderDate2);
-        //        }
-        //        ok(orderDate.getTime() === orderDate2a.getTime(), "should be the same date");
-        //    }).fail(testFns.handleFail).fin(start);
-
-        //});
 
     }
 }
