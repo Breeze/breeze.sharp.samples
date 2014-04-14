@@ -33,10 +33,10 @@ namespace Test_NetClient
 
         #region Metadata
 
-       
-
         [TestMethod]
         public void MetadataNeededToGetEntityKey() {
+
+            Assert.Inconclusive("Test depends on static MetadataStore state.  Results valid only if test is run alone.");
 
             // Metadata is necessary to get entity key
             // Must be first test to be meaningful, since CanFetchMetadata() below fetches 
@@ -50,13 +50,13 @@ namespace Test_NetClient
                 Assert.Fail("EntityKey constructor should fail if metadata not fetched");
             }
             catch (Exception e) {
-                Assert.IsTrue(e.Message.Contains("There are no KeyProperties yet defined"), "Thrown exception should indicated key property is not defined");
+                Assert.IsTrue(e.Message.Contains("There are no KeyProperties yet defined"), "Thrown exception should indicated key property is not defined.  Instead it says \"" + e.Message + "\"");
             }
         }
 
         [TestMethod]
         public async Task CanGetMetadata() {
-            
+
             // Confirm the metadata can be fetched from the server
             var entityManager = new EntityManager(_serviceName);
             var dataService = await entityManager.FetchMetadata();
@@ -68,23 +68,21 @@ namespace Test_NetClient
         #region Basic queries
 
         [TestMethod]
-        public async Task AllCustomers_Concise()
-        {
+        public async Task AllCustomers_Concise() {
             // All instances of Customer
             var query = EntityQuery.From<Customer>();                       // One way to create a basic EntityQuery
-            
+
             // Execute the query via a test helper method that encapsulates the ceremony
             await TestFns.VerifyQuery(query, _serviceName, "All customers");
         }
 
         [TestMethod]
-        public async Task AllCustomers_Task()
-        {
+        public async Task AllCustomers_Task() {
             var entityManager = new EntityManager(_serviceName);
-            
+
             // All instances of Customer
             var query = new EntityQuery<Customer>();                        // Alternate way to create a basic EntityQuery
-            
+
             // Handle async Task results explicitly
             await entityManager.ExecuteQuery(query).ContinueWith(task =>
                 {
@@ -98,20 +96,21 @@ namespace Test_NetClient
                     }
                 });
         }
-      
+
         [TestMethod]
         public async Task AllCustomers_Exceptions() {
             var entityManager = new EntityManager(_serviceName);
-            
+
             // All instances of Customer
-            var query = new EntityQuery<Customer>(); 
-            
+            var query = new EntityQuery<Customer>();
+
             // Capture result using try-catch
             try {
                 var results = await entityManager.ExecuteQuery(query);
                 var count = results.Count();
                 Assert.IsTrue(count > 0, "Customer query returned " + count + " customers");
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 var message = TestFns.FormatException(e);
                 Assert.Fail(message);
             }
@@ -140,7 +139,7 @@ namespace Test_NetClient
         public async Task CanFetchEntityTwice() {
             var entityManager = new EntityManager(_serviceName);
             await entityManager.FetchMetadata();
-            
+
             var customerType = MetadataStore.Instance.GetEntityType(typeof(Customer));
             var key = new EntityKey(customerType, _alfredsID);
 
@@ -253,7 +252,7 @@ namespace Test_NetClient
                 AssertGotOrderDetails(entityManager, orders);
                 AssertGotCustomerByExpand(entityManager, orders);
                 AssertGotProductsByExpand(entityManager, orders);
-            } 
+            }
             catch (Exception e) {
                 var message = TestFns.FormatException(e);
                 Assert.Fail(message);
@@ -275,8 +274,7 @@ namespace Test_NetClient
             }
         }
 
-        private void AssertGotOrderDetails(EntityManager entityManager, IEnumerable<Order> orders)
-        {
+        private void AssertGotOrderDetails(EntityManager entityManager, IEnumerable<Order> orders) {
             var odType = MetadataStore.Instance.GetEntityType("OrderDetail");
 
             // Check that there are order details in cache
@@ -293,15 +291,13 @@ namespace Test_NetClient
             //   (select OrderID from [Order] where CustomerID = '785efa04-cbf2-4dd7-a7de-083ee17b6ad2')
         }
 
-        private void AssertGotCustomerByExpand(EntityManager entityManager, IEnumerable<Order> orders)
-        {
+        private void AssertGotCustomerByExpand(EntityManager entityManager, IEnumerable<Order> orders) {
             var firstOrder = orders.FirstOrDefault();
             Assert.IsNotNull(firstOrder, "There should be at least one order returned");
             Assert.IsNotNull(firstOrder.Customer, "Related customer should be returned");
         }
 
-        private void AssertGotProductsByExpand(EntityManager entityManager, IEnumerable<Order> orders)
-        {
+        private void AssertGotProductsByExpand(EntityManager entityManager, IEnumerable<Order> orders) {
             Assert.IsTrue(orders.Any(), "There should be at least one order returned");
             var firstOrder = orders.First();
 
@@ -369,10 +365,10 @@ namespace Test_NetClient
                 var pagedTask = entityManager.ExecuteQuery(pagedQuery);
                 await Task.WhenAll(productTask, pagedTask);
 
-                var productCount        = productTask.Result.Count();
-                var pageCount          = pagedTask.Result.Count();
-                var pagedQueryResult    = pagedTask.Result as QueryResult<Product>;
-                var inlineCount         = pagedQueryResult.InlineCount;
+                var productCount = productTask.Result.Count();
+                var pageCount = pagedTask.Result.Count();
+                var pagedQueryResult = pagedTask.Result as QueryResult<Product>;
+                var inlineCount = pagedQueryResult.InlineCount;
 
                 Assert.AreEqual(productCount, inlineCount, "Inline count should return item count excluding skip/take");
                 Assert.IsTrue(pageCount <= productCount, "Paged query should return subset of total query");
@@ -384,74 +380,243 @@ namespace Test_NetClient
         }
 
 
-    private void VerifyProductResults(IEnumerable<Product> products) {
-        var limit = 15;
-        var count = products.Count();
-        var results = limit < count ? products.Take(limit) : products;
-        results.ForEach(p =>
-            Console.WriteLine(string.Format("({0}) '{1}' at ${2} in '{3}'",
-                                            p.ProductID, p.ProductName, 
-                                            p.UnitPrice, p.Category.CategoryName)));
-        if (count > results.Count()) { 
-            Console.WriteLine("..."); 
+        private void VerifyProductResults(IEnumerable<Product> products) {
+            var limit = 15;
+            var count = products.Count();
+            var results = limit < count ? products.Take(limit) : products;
+            results.ForEach(p =>
+                Console.WriteLine(string.Format("({0}) '{1}' at ${2} in '{3}'",
+                                                p.ProductID, p.ProductName,
+                                                p.UnitPrice, p.Category.CategoryName)));
+            if (count > results.Count()) {
+                Console.WriteLine("...");
+            }
         }
-    }
 
-    #endregion Ordering and Paging
+        #endregion Ordering and Paging
 
-    #region Projection
+        #region Projection
 
-   
-
-    [TestMethod]
-    public async Task Projection() {
-      try {
-        var entityManager = await TestFns.NewEm(_serviceName);
-        // Next line does not work because of MS OData restrictions.
-        // var productNames = await new EntityQuery<Product>().Select(p => p.ProductName).Execute(entityManager);
-        var productNames = await new EntityQuery<Product>().Select(p => new { p.ProductName }).Execute(entityManager);
-        Assert.IsTrue(productNames.Any(), "Projection query should return items");
-      } catch (Exception e) {
-        var message = TestFns.FormatException(e);
-        Assert.Fail(message);
-      }
-    }
-
-
-    #endregion Projection
-
-    #region Using specialized server controller methods
-
-    [TestMethod]
-    public async Task SpecializedMethods() {
-        try {
-            var entityManager = await TestFns.NewEm(_serviceName);
-
-            // CustomersAsHRM returns an HTTPResponseMessage
-            // can filter, select, and expand 
-            var query = EntityQuery.From<Customer>("CustomersAsHRM")
-                                   .Where(c => c.CustomerID == _alfredsID)
-                                   .Select(c => new
-                                   {
-                                       CustomerID = c.CustomerID,
-                                       CompanyName = c.CompanyName,
-                                   });
-            var items = await entityManager.ExecuteQuery(query);
-            Assert.IsTrue(items.Count() == 1, "Should return one customer projection item");
-            var item = items.FirstOrDefault();
-
+        [TestMethod]
+        public async Task Projection() {
+            try {
+                var entityManager = await TestFns.NewEm(_serviceName);
+                // Next line does not work because of MS OData restrictions.
+                // var productNames = await new EntityQuery<Product>().Select(p => p.ProductName).Execute(entityManager);
+                var productNames = await new EntityQuery<Product>().Select(p => new { p.ProductName }).Execute(entityManager);
+                Assert.IsTrue(productNames.Any(), "Projection query should return items");
+            }
+            catch (Exception e) {
+                var message = TestFns.FormatException(e);
+                Assert.Fail(message);
+            }
         }
-        catch (Exception e) {
-            var message = TestFns.FormatException(e);
-            Assert.Fail(message);
+
+        [TestMethod]
+        public async Task AnonymousProjection() {
+            try {
+                var entityManager = await TestFns.NewEm(_serviceName);
+
+                // Anonymous projection of single property
+                // Use anonymous type due to raw property projection not supported by OData
+                var productNames = await new EntityQuery<Product>().Select(p => new { p.ProductName }).Execute(entityManager);
+                Assert.IsTrue(productNames.Any(), "Projection query should return items");
+
+                // Projection of multiple properties with filter condition and ordering
+                var query1 = new EntityQuery<Customer>().Where(c => c.CompanyName.StartsWith("C"))
+                                                        .OrderBy(obj => obj.CompanyName)
+                                                        .Select(c => new
+                                                        {
+                                                            CustomerID = c.CustomerID,
+                                                            CompanyName = c.CompanyName,
+                                                            ContactName = c.ContactName,
+                                                        });
+
+                var results1 = await entityManager.ExecuteQuery(query1);
+                Assert.IsTrue(results1.Any(), "Orojection query should produce data");
+                Assert.IsTrue(results1.Select(obj => obj.CustomerID).OfType<Guid>().Any(), "resulting CustomerIDs should be Guids");
+                Assert.IsTrue(results1.Select(obj => obj.CompanyName).OfType<string>().Any(), "resulting CompanyNames should be strings");
+                Assert.IsTrue(results1.Select(obj => obj.ContactName).OfType<string>().Any(), "resulting ContactNames should be strings");
+
+                var customersInCache = entityManager.GetEntities<Customer>();
+                Assert.IsFalse(customersInCache.Any(), "projection query should not have retrieved customers into cache");
+
+                // Projection containing a collection
+                // Note that orders are in cache because they are whole entities
+                // Customer names are not entities and are not in cache.
+                var query2 = new EntityQuery<Customer>().Where(c => c.CompanyName.StartsWith("C"))
+                                                        .OrderBy(obj => obj.CompanyName)
+                                                        .Select(c => new
+                                                        {
+                                                            CompanyName = c.CompanyName,
+                                                            Orders = c.Orders
+                                                        });
+                var results2 = await entityManager.ExecuteQuery(query2);
+
+                Assert.IsTrue(results2.Any(), "projection query should produce data");
+                Assert.IsTrue(results2.Select(obj => obj.CompanyName).OfType<string>().Any(), "resulting CompanyNames should be strings");
+
+                var ordersInCache = entityManager.GetEntities<Order>();
+                Assert.IsTrue(ordersInCache.Any(), "projection containing orders should have retrieved orders into cache");
+            }
+            catch (Exception e) {
+                var message = TestFns.FormatException(e);
+                Assert.Fail(message);
+            }
         }
-    }
 
-    #endregion Using specialized server controller methods
+        [TestMethod]
+        public async Task ServerSideProjection() {
+            try {
+                var entityManager = await TestFns.NewEm(_serviceName);
+
+                // Query from service that projects User onto UserPartial, omitting the Password property
+                var query1 = EntityQuery.From("UserPartials", new
+                                  {
+                                      Id = 0L,
+                                      UserName = "",
+                                      FirstName = "",
+                                      LastName = ""
+                                      // Even though this works, sending every user's roles seems unwise
+                                      // Roles = user.UserRoles.Select(ur => ur.Role)
+                                  });
+                var users1 = await query1.Execute(entityManager);
+
+                Assert.IsTrue(users1.Any(), "UserPartials query should produce data");
+                var user1 = users1.First();
+
+                var usersInCache = entityManager.GetEntities<User>();
+                Assert.IsFalse(usersInCache.Any(), "UserPartials query should not have retrieved User entities into cacha");
+
+                var rolesInCache = entityManager.GetEntities<Role>();
+                Assert.IsFalse(rolesInCache.Any(), "UserPartials query should not have retrieved Role entities into cacha");
+
+                // Query from similar service that accepts parameter
+                var query2 = EntityQuery.From("GetUserById", new
+                                    {
+                                        Id = 0L,
+                                        UserName = "",
+                                        FirstName = "",
+                                        LastName = "",
+                                        Roles = Enumerable.Empty<Role>()
+                                        // Even though this works, sending every user's roles seems unwise
+                                        // Roles = user.UserRoles.Select(ur => ur.Role)
+                                    }).WithParameter("Id", 3);
+
+                var users2 = await query2.Execute(entityManager);
+                Assert.IsTrue(users2.Count() == 1, "GetUserById query should return exactly 1 user");
+                var user2 = users2.First();
+
+                var usersInCache2 = entityManager.GetEntities<User>();
+                Assert.IsFalse(usersInCache2.Any(), "GetUserById query should not have retrieved User entities into cacha");
+
+                var roles = user2.GetPropValue<IEnumerable<Role>>("Roles");
+                Assert.IsTrue(roles.Any(), "User with Id 3 should have defined roles");
+            }
+            catch (Exception e) {
+                var message = TestFns.FormatException(e);
+                Assert.Fail(message);
+            }
+        }
 
 
+        [TestMethod]
+        public async Task LookupsArray() {
+            try {
+                var entityManager = await TestFns.NewEm(_serviceName);
 
-//=======================================================================================================================================
+                // Query from special purpose server controller method
+                // See LookupsArray() method in NorthwindController.cs in DocCode.Server project
+                var query = EntityQuery.From("LookupsArray", Enumerable.Empty<BaseEntity>());
+                var data = await query.Execute(entityManager);
+                Assert.IsTrue(data.Count() == 3, "LookupsArray query should return three lists");
+                var dataArray = data.ToArray();
+
+                var regions = dataArray[0].OfType<Region>();
+                var territories = dataArray[1].OfType<Territory>();
+                var categories = dataArray[2].OfType<Category>();
+
+                Assert.IsTrue(regions.Any(), "LookupsArray query should return regions");
+                Assert.IsTrue(territories.Any(), "LookupsArray query should return territories");
+                Assert.IsTrue(categories.Any(), "LookupsArray query should return categories");
+
+                Assert.AreEqual(categories.First().EntityAspect.EntityState, EntityState.Unchanged, "State of first category in cache should be unchanged");
+            }
+            catch (Exception e) {
+                var message = TestFns.FormatException(e);
+                Assert.Fail(message);
+            }
+        }
+
+        [TestMethod]
+        public async Task Lookups() {
+            try {
+                var entityManager = await TestFns.NewEm(_serviceName);
+
+                // Query from special purpose server controller method
+                // See Lookups() method in NorthwindController.cs in DocCode.Server project
+                var query = EntityQuery.From("Lookups", new
+                {
+                    regions = Enumerable.Empty<Region>(),
+                    territories = Enumerable.Empty<Territory>(),
+                    categories = Enumerable.Empty<Category>(),
+                });
+                var data = await query.Execute(entityManager);
+                Assert.IsTrue(data.Count() == 1, "Lookups query should return single item");
+                var lookups = data.First();
+
+                var regions = lookups.GetPropValue<IEnumerable<Region>>("regions");
+                var territories = lookups.GetPropValue<IEnumerable<Region>>("territories");
+                var categories = lookups.GetPropValue<IEnumerable<Region>>("categories");
+
+                Assert.IsTrue(regions.Any(), "Lookups query should return regions");
+                Assert.IsTrue(territories.Any(), "Lookups query should return territories");
+                Assert.IsTrue(categories.Any(), "Lookups query should return categories");
+
+                Assert.AreEqual(categories.First().EntityAspect.EntityState, EntityState.Unchanged, "State of first category in cache should be unchanged");
+
+
+            }
+            catch (Exception e) {
+                var message = TestFns.FormatException(e);
+                Assert.Fail(message);
+            }
+        }
+
+        #endregion Projection
+
+        #region Using specialized server controller methods
+
+        [TestMethod]
+        public async Task SpecializedMethods() {
+            try {
+                var entityManager = await TestFns.NewEm(_serviceName);
+
+                // CustomersAsHRM returns an HTTPResponseMessage
+                // can filter, select, and expand 
+                var query = EntityQuery.From<Customer>("CustomersAsHRM")
+                                       .Where(c => c.CustomerID == _alfredsID)
+                                       .Select(c => new
+                                       {
+                                           CustomerID = c.CustomerID,
+                                           CompanyName = c.CompanyName,
+                                       });
+                var items = await entityManager.ExecuteQuery(query);
+                Assert.IsTrue(items.Count() == 1, "Should return one customer projection item");
+                var item = items.FirstOrDefault();
+
+            }
+            catch (Exception e) {
+                var message = TestFns.FormatException(e);
+                Assert.Fail(message);
+            }
+        }
+
+        #endregion Using specialized server controller methods
+
+        #region Original contents of Breeze.sharp.internal.tests QueryTests.cs
+
+        //=======================================================================================================================================
 
         //*********************************************************
         // Original contents of Breeze.sharp.internal.tests QueryTests.cs
@@ -460,8 +625,8 @@ namespace Test_NetClient
 
         [TestMethod]
         public async Task SimpleQuery() {
-            var em1     = await TestFns.NewEm(_serviceName);
-            var q       = new EntityQuery<Customer>();
+            var em1 = await TestFns.NewEm(_serviceName);
+            var q = new EntityQuery<Customer>();
             var results = await em1.ExecuteQuery(q);
             Assert.IsTrue(results.Cast<Object>().Count() > 0);
         }
@@ -623,7 +788,7 @@ namespace Test_NetClient
             var results = await q3.Execute(em1);
 
             Assert.IsTrue(results.Count() > 0);
-            var ok = results.All(r1 => (r1.Orders.Any()) );
+            var ok = results.All(r1 => (r1.Orders.Any()));
             Assert.IsTrue(ok, "every item of anon should contain a collection of Orders");
         }
 
@@ -720,9 +885,9 @@ namespace Test_NetClient
             var results = await q3.Execute(em1);
 
             Assert.IsTrue(results.Count() > 0);
-          var ok = results.All(r1 =>
-            r1.GetType() == typeof (Dummy) && r1.Orders.Any());
-            
+            var ok = results.All(r1 =>
+              r1.GetType() == typeof(Dummy) && r1.Orders.Any());
+
             Assert.IsTrue(ok, "every Dummy should contain a collection of Orders");
             ok = results.All(r1 => r1.CompanyName.Length > 0);
             Assert.IsTrue(ok, "and should have a populated company name");
@@ -878,8 +1043,7 @@ namespace Test_NetClient
 
         }
 
-
-
+        #endregion Original contents of Breeze.sharp.internal.tests QueryTests.cs
     }
 }
 

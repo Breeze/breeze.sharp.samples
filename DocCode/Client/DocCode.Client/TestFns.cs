@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -13,6 +14,16 @@ using Breeze.Sharp;
 
 namespace Test_NetClient
 {
+    public static class ObjectExtensions
+    {
+        // Fast method to get value of property by name with type validation
+        // Throws if property name not present or of incompatible type
+        public static T GetPropValue<T>(this object component, string propertyName) {
+            return (T)TypeDescriptor.GetProperties(component)[propertyName].GetValue(component);
+        }
+
+    }
+
     public static class TestFns
     {
         public static void RunInWpfSyncContext(Func<Task> function) {
