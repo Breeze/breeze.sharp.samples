@@ -26,6 +26,17 @@ namespace Test_NetClient
 
     public static class TestFns
     {
+        public static async Task<EntityManager> NewEm(string serviceName) {
+            if (MetadataStore.Instance.GetDataService(serviceName) == null) {
+                var em = new EntityManager(serviceName);
+                await em.FetchMetadata();
+                return em;
+            }
+            else {
+                return new EntityManager(serviceName);
+            }
+        }
+
         public static void RunInWpfSyncContext(Func<Task> function) {
             if (function == null) throw new ArgumentNullException("function");
             var prevCtx = SynchronizationContext.Current;
@@ -44,17 +55,6 @@ namespace Test_NetClient
             }
             finally {
                 SynchronizationContext.SetSynchronizationContext(prevCtx);
-            }
-        }
-
-        public static async Task<EntityManager> NewEm(string serviceName) {
-            if (MetadataStore.Instance.GetDataService(serviceName) == null) {
-                var em = new EntityManager(serviceName);
-                await em.FetchMetadata();
-                return em;
-            }
-            else {
-                return new EntityManager(serviceName);
             }
         }
 

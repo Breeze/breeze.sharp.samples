@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model_Inheritance.Sharp", "Client\Model_Inheritance.Sharp\Model_Inheritance.Sharp.csproj", "{58B41CC6-8D34-40C4-9342-DB55AE6CCA02}"
 EndProject
@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		ReadMe1.txt = ReadMe1.txt
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model_Todos.Sharp", "Client\Model_Todos.Sharp\Model_Todos.Sharp.csproj", "{F784CDB4-43D0-4105-B7C1-8F1DCFFB14AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{7E8A3A34-7B7C-4D86-945B-E376431CD798}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E8A3A34-7B7C-4D86-945B-E376431CD798}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E8A3A34-7B7C-4D86-945B-E376431CD798}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F784CDB4-43D0-4105-B7C1-8F1DCFFB14AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F784CDB4-43D0-4105-B7C1-8F1DCFFB14AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F784CDB4-43D0-4105-B7C1-8F1DCFFB14AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F784CDB4-43D0-4105-B7C1-8F1DCFFB14AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{E357F17B-6A21-4682-B7C8-3EBFEBF862F3} = {73F770A7-E94F-4EB3-848E-936505F88934}
 		{58B41CC6-8D34-40C4-9342-DB55AE6CCA02} = {73F770A7-E94F-4EB3-848E-936505F88934}
 		{4D6A9F58-1E92-4EB1-996F-7D7328975740} = {73F770A7-E94F-4EB3-848E-936505F88934}
+		{F784CDB4-43D0-4105-B7C1-8F1DCFFB14AA} = {73F770A7-E94F-4EB3-848E-936505F88934}
 		{57E72B09-3299-4AF9-8A81-5D82C37613D7} = {01FD8CF7-6C04-415B-A58B-B848A122E5CA}
 		{D91EA111-BAB8-41E3-86CB-E87FDCAECB60} = {01FD8CF7-6C04-415B-A58B-B848A122E5CA}
 		{7E8A3A34-7B7C-4D86-945B-E376431CD798} = {01FD8CF7-6C04-415B-A58B-B848A122E5CA}
