@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Breeze.ContextProvider;
 // using Breeze.ContextProvider.EF6;
@@ -37,6 +38,9 @@ namespace DocCode.DataAccess
                 {
                     case EntityState.Added:
                         saveable.UserSessionId = UserSessionId;
+                        if (arg.OriginalValuesMap == null) {
+                          arg.OriginalValuesMap = new Dictionary<string, object>();
+                        }
                         arg.OriginalValuesMap.Add("UserSessionId", UserSessionId);
                         saveError = saveable.CanAdd();
                         break;
