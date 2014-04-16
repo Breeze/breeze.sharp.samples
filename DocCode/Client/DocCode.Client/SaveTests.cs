@@ -209,24 +209,30 @@ namespace Test_NetClient
             var description     = "Save todo in Breeze";
             newTodo.Description = description;
 
-            var saveResult = await entityManager.SaveChanges();
-        
-            var id              = newTodo.Id; // permanent id is now known
+            try {
+                await entityManager.SaveChanges();
+            }
+            catch (Exception e) {
+                var message = "SaveChanges should not fail with the error " + e.Message;
+                Assert.Fail(message);
+            }
+
+            var id = newTodo.Id; // permanent id is now known
             Assert.AreNotEqual(tempId, id, "New permanent Id value should be populated in entity by SaveChanges()");
 
             // Clear local cache and re-query from database to confirm it really did get saved
             entityManager.Clear();
-            var query           = new EntityQuery<TodoItem>().Where(td => td.Id == id);
-            var todos1          = await entityManager.ExecuteQuery(query);
+            var query = new EntityQuery<TodoItem>().Where(td => td.Id == id);
+            var todos1 = await entityManager.ExecuteQuery(query);
             Assert.IsTrue(todos1.Count() == 0, "Requery of saved Todo should yield one item");
-            var todo1           = todos1.First();
+            var todo1 = todos1.First();
             Assert.IsTrue(todo1.Description == description, "Requeried entity should have saved values");
 
             // Requery into new entity manager
-            var entityManager2  = await TestFns.NewEm(_todosServiceName);
-            var todos2          = await entityManager.ExecuteQuery(query);
+            var entityManager2 = await TestFns.NewEm(_todosServiceName);
+            var todos2 = await entityManager.ExecuteQuery(query);
             Assert.IsTrue(todos2.Count() == 0, "Requery of saved Todo should yield one item");
-            var todo2           = todos2.First();
+            var todo2 = todos2.First();
             Assert.IsTrue(todo2.Description == description, "Requeried entity should have saved values");
 
             Assert.AreNotSame(todo1, todo2, "Objects in different entity managers should not be the same object");
@@ -254,13 +260,18 @@ namespace Test_NetClient
             var numChanges = entityManager.GetChanges().Count();
             Assert.AreEqual(numChanges, 3, "There should be three changed entities in the cache");
 
-            var saveResult = await entityManager.SaveChanges();
-
-            Assert.AreEqual(saveResult.Entities.Count(), 3, "There should be three saved entities");
-            saveResult.Entities.ForEach(todo =>
-                {
-                    Assert.IsTrue(todo.EntityAspect.EntityState.IsUnchanged(), "All saved entities should be in unchanged state");
-                });
+            try {
+                var saveResult = await entityManager.SaveChanges();
+                Assert.AreEqual(saveResult.Entities.Count(), 3, "There should be three saved entities");
+                saveResult.Entities.ForEach(todo =>
+                    {
+                        Assert.IsTrue(todo.EntityAspect.EntityState.IsUnchanged(), "All saved entities should be in unchanged state");
+                    });
+            }
+            catch (Exception e) {
+                var message = "Server should not have rejected save of TodoItem entity with the error " + e.Message;
+                Assert.Fail(message);
+            }
 
             var entitiesInCache = entityManager.GetEntities();
             Assert.AreEqual(entitiesInCache.Count(), 2, "There should be only two entities is cache after save of deleted entity");
@@ -278,28 +289,46 @@ namespace Test_NetClient
 
             // Add a new Todo
             var newTodo         = entityManager.CreateEntity<TodoItem>();
-            Assert.AreEqual(eventCount, 1, "Only one HasChangedChanged event should be signalled when entity added");
+            newTodo.Description = "New Todo Item";
+            Assert.AreEqual(1, eventCount, "Only one HasChangedChanged event should be signalled when entity added");
             Assert.IsTrue(lastEventArgs.HasChanges, "HasChanagesChanged should signal true after new entity added");
             eventCount = 0;
 
             // Discard the added Todo
-            entityManager.RejectChanges();
+            try {
+                entityManager.RejectChanges();
+            }
+            catch (Exception e) {
+                var message = "RejectChanges() should not fail with the error " + e.Message;
+                Assert.Fail(message);
+            }
 
-            Assert.AreEqual(eventCount, 1, "Only one HasChangedChanged event should be signalled on RejectChanges() call");
+            Assert.AreEqual(1, eventCount, "Only one HasChangedChanged event should be signalled on RejectChanges() call");
             Assert.IsFalse(lastEventArgs.HasChanges, "HasChanagesChanged should signal false after RejectChanges() call");
             Assert.IsFalse(entityManager.HasChanges(), "EntityManager should have no pending changes after RejectChanges() call");
             eventCount = 0;
 
             // Add another new Todo
             var newTodo2         = entityManager.CreateEntity<TodoItem>();
-            Assert.AreEqual(eventCount, 1, "Only one HasChangedChanged event should be signalled when entity added");
+            newTodo2.Description  = "New Todo Item2";
+            Assert.AreEqual(1, eventCount, "Only one HasChangedChanged event should be signalled when entity added");
             Assert.IsTrue(lastEventArgs.HasChanges, "HasChanagesChanged should signal true after new entity added");
             eventCount = 0;
 
-            // Sve changes
-            entityManager.SaveChanges();
+            // Save changes
+            try { 
+                await entityManager.SaveChanges();
+            }
+            catch (SaveException e) {
+                 var message = "SaveChanges() should not fail with the error " + e.Message;
+                 e.ValidationErrors.ForEach(ve =>
+                 {
+                     message += Environment.NewLine + "    " + ve.Message;
+                 });
+                Assert.Fail(message);
+            }
 
-            Assert.AreEqual(eventCount, 1, "Only one HasChangedChanged event should be signalled on SaveChanges() call");
+            Assert.AreEqual(1, eventCount, "Only one HasChangedChanged event should be signalled on SaveChanges() call");
             Assert.IsFalse(lastEventArgs.HasChanges, "HasChanagesChanged should signal false after SaveChanges() call");
             Assert.IsFalse(entityManager.HasChanges(), "EntityManager should have no pending changes after SaveChanges() call");
             eventCount = 0;
