@@ -336,7 +336,124 @@ namespace Test_NetClient
             eventCount = 0;
 
         }
-    
+
+        [TestMethod]
+        public async Task ConcurrentSaves() {
+            var entityManager = await TestFns.NewEm(_todosServiceName);
+
+            /*********************************************************
+            * Concurrent save throws exceptions by default
+            *********************************************************/
+            var todo = entityManager.CreateEntity<TodoItem>();
+            todo.Description = "Todo Number 1";
+
+            Task saveTask1 = null;
+            Task saveTask2 = null;
+
+            // Default behavior is to disallow concurrent calls to SaveChanges()
+
+            try {
+                saveTask1 = entityManager.SaveChanges();        // Shold succeed
+                saveTask2 = entityManager.SaveChanges();        // Should throw
+                //Assert.Fail("SaveChanges() call while another is pending should throw by default");
+            }
+            catch (Exception e) {
+                var message = "Success: Second SaveChanges() threw exception: " + e.Message;
+                Assert.Fail(message);
+            }
+            await Task.WhenAll(saveTask1, saveTask2);
+
+            var todos1 = await new EntityQuery<TodoItem>().Where(td => td.Description == "Todo Number 1").Execute(entityManager);
+            var count1 = todos1.Count();
+            Assert.AreEqual(1, count1, "After disallowed concurrent save, there should be only one entity in databse");
+
+
+            /*********************************************************
+            * Second save w/ 'allowConcurrentSaves'  - saves a new entity twice!
+            * That is terrible! 
+            * DON'T USE THIS FEATURE UNLESS YOU KNOW WHY
+            *********************************************************/
+            var todo2 = entityManager.CreateEntity<TodoItem>();
+            todo2.Description = "Todo Number 2";
+            var options = new SaveOptions(null, null, true, null);
+
+            try {
+                saveTask1 = entityManager.SaveChanges(options);        // Should succeed
+                saveTask2 = entityManager.SaveChanges(options);        // Should succeed
+            }
+            catch (Exception e) {
+                var message = "With allowConcurrentSaves = true, concurrent SaveChanges() calls should not fail with message: " + e.Message;
+                Assert.Fail(message);
+            }
+            await Task.WhenAll(saveTask1, saveTask2);
+            var todos2 = await new EntityQuery<TodoItem>().Where(td => td.Description == "Todo Number 2").Execute(entityManager);
+            var count2 = todos2.Count();
+            Assert.AreEqual(2, count2, "After concurrent save, there should be two entities in databse");
+
+
+            /*********************************************************
+            * Concurrent save with separate managers is ok
+            * as if two different users saved concurrently
+            *********************************************************/
+            var todo3 = entityManager.CreateEntity<TodoItem>();
+            todo.Description = "Todo Number 3";
+
+            var entityManager2 = await TestFns.NewEm(_todosServiceName);
+            var todo4 = entityManager2.CreateEntity<TodoItem>();
+            todo.Description = "Todo Number 4";
+
+            try {
+                saveTask1 = entityManager.SaveChanges();        // Shold succeed
+                saveTask2 = entityManager2.SaveChanges();       // Should succeed
+            }
+            catch (Exception e) {
+                var message = "Concurrent saves to different entity managers should not fail with message:" + e.Message;
+                Assert.Fail(message);
+            }
+
+            await Task.WhenAll(saveTask1, saveTask2);
+            var todos3 = await new EntityQuery<TodoItem>().Where(td => td.Description == "Todo Number 3").Execute(entityManager);
+            var todos4 = await new EntityQuery<TodoItem>().Where(td => td.Description == "Todo Number 4").Execute(entityManager);
+            Assert.IsTrue(todos3.Count() == 1 && todos4.Count() == 1, "After concurrent save from separate entity managers, both entities should be in database");
+        }
+
+        [TestMethod]
+        public async Task QueuedSaves() {
+            var entityManager = await TestFns.NewEm(_todosServiceName);
+
+            /*********************************************************
+            * QueuedSaves options ensures saves executed sequentially,
+            * each saving pending changes at the moment it is started
+            *********************************************************/
+
+            //entityManager.EnableSaveQueueing = true;
+            Task saveTask1 = null;
+            Task saveTask2 = null;
+            Task saveTask3 = null;
+
+            try {
+            var todo1 = entityManager.CreateEntity<TodoItem>();
+            todo1.Description = "Todo 1";
+            saveTask1 = entityManager.SaveChanges();
+
+            var todo2 = entityManager.CreateEntity<TodoItem>();
+            todo2.Description = "Todo 2";
+            saveTask1 = entityManager.SaveChanges();
+
+            var todo3 = entityManager.CreateEntity<TodoItem>();
+            todo2.Description = "Todo 3";
+            saveTask1 = entityManager.SaveChanges();
+            } catch (Exception e) {
+                Assert.Fail("With save queueing enabled, concurrent SaveChanges() calls should not fail with message: " + e.Message);
+            }
+
+            await Task.WhenAll(saveTask1, saveTask2, saveTask3);
+                   
+            Assert.IsFalse(entityManager.HasChanges(), "Entity manager should not have pending changes after all saves have completed");
+        }
+   
+        #region Unmapped Properties
+
         /*********************************************************
         * can save entity with an unmapped property
         * The unmapped property is sent to the server where it is unknown to the Todo class
@@ -396,6 +513,8 @@ namespace Test_NetClient
             return new breeze.MetadataStore().importMetadata(metaExport);
         }
     */
+
+        #endregion Unmapped Properties
     }
 }
 
