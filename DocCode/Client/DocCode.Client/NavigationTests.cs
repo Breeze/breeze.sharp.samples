@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
@@ -118,9 +117,9 @@ namespace Test_NetClient
             var orderPropertyChangedEventCount              = 0;
             var customerPropertyChangedEventCount           = 0;
             var customerOrdersPropertyChangedEventCount     = 0;
-            ((INotifyPropertyChanged) newOrder).PropertyChanged           += (s, e) => ++orderPropertyChangedEventCount;      
-            ((INotifyPropertyChanged) existingCustomer).PropertyChanged   += (s, e) => ++customerPropertyChangedEventCount;   
-            existingCustomer.Orders.PropertyChanged         += (s, e) => ++customerOrdersPropertyChangedEventCount;
+            newOrder.EntityAspect.EntityPropertyChanged           += (s, e) => ++orderPropertyChangedEventCount;      
+            existingCustomer.EntityAspect.EntityPropertyChanged   += (s, e) => ++customerPropertyChangedEventCount;   
+            existingCustomer.Orders.PropertyChanged               += (s, e) => ++customerOrdersPropertyChangedEventCount;
 
             // Set order's Customer
             newOrder.Customer = existingCustomer;

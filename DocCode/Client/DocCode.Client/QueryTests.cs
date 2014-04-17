@@ -165,7 +165,7 @@ namespace Test_NetClient
 
             var query2 = new EntityQuery<Customer>().Where(c => c.CompanyName == alfred1.CompanyName);
             var alfred2 = (await entityManager.ExecuteQuery(query2)).FirstOrDefault();
-            Assert.IsTrue(ReferenceEquals(alfred1, alfred2), "Successive queried should return same entity");
+            Assert.IsTrue(ReferenceEquals(alfred1, alfred2), "Successive queries should return same entity");
         }
 
         [TestMethod]

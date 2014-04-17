@@ -40,9 +40,9 @@ namespace Test_NetClient
             var entityManager = await TestFns.NewEm(_northwindServiceName);
 
             // Create a new customer
-            var customer = new Customer();
-            customer.CustomerID = Guid.NewGuid();
-            customer.CompanyName ="Test1 " + DateTime.Now.ToString();
+            var customer            = new Customer();
+            customer.CustomerID     = Guid.NewGuid();
+            customer.CompanyName    ="Test1 " + DateTime.Now.ToString();
             entityManager.AddEntity(customer);
             Assert.IsTrue(customer.EntityAspect.EntityState == EntityState.Added, "State of new entity should be Added");
 
@@ -242,17 +242,27 @@ namespace Test_NetClient
         public async Task AddUpdateAndDeleteInBatch() {
             var entityManager = await TestFns.NewEm(_todosServiceName);
 
+            // Be sure there are at least two Todos in the database so we have something to update and delete
+            var now             = DateTime.Now;
+            var todo            = entityManager.CreateEntity<TodoItem>();
+            todo.Description    = "OLD1: " + now;
+            todo.CreatedAt      = now;
+            todo                = entityManager.CreateEntity<TodoItem>();
+            todo.Description    = "OLD2: " + now;
+            todo.CreatedAt      = now;
+            await entityManager.SaveChanges();
+
             // Add a new Todo
             var newTodo         = entityManager.CreateEntity<TodoItem>();
-            newTodo.Description = "Save todo in Breeze";
+            newTodo.Description = "NEW: " + now;
 
-            // Get two Todos to modify and delete
-            var twoQuery = new EntityQuery<TodoItem>().Take(2);
-            var todos = await entityManager.ExecuteQuery(twoQuery);
-            Assert.IsTrue(todos.Count() == 2, "Take(2) query should return two items");
+            // Get the two Todos to modify and delete
+            var twoQuery        = new EntityQuery<TodoItem>().Where(td => td.CreatedAt == now).Take(2);
+            var todos           = await entityManager.ExecuteQuery(twoQuery);
+            Assert.IsTrue(todos.Count() == 2, "Take(2) query should return the two items");
 
-            var updateTodo = todos.First();
-            updateTodo.Description = TestFns.MorphString(updateTodo.Description);
+            var updateTodo          = todos.First();
+            updateTodo.Description  = "UPDATE: " + now;
 
             var deleteTodo = todos.Skip(1).First();
             deleteTodo.EntityAspect.Delete();
@@ -263,20 +273,18 @@ namespace Test_NetClient
             try {
                 var saveResult = await entityManager.SaveChanges();
                 Assert.AreEqual(saveResult.Entities.Count(), 3, "There should be three saved entities");
-                saveResult.Entities.ForEach(todo => {
-                  var entityState = todo.EntityAspect.EntityState;
-                  Assert.IsTrue(entityState.IsUnchanged() || entityState.IsDetached(), "All saved entities should be in unchanged state");
-                });
+                Assert.IsTrue(saveResult.Entities.All(e => e.EntityAspect.EntityState.IsUnchanged() || e.EntityAspect.EntityState.IsDetached()), 
+                              "All saved entities should be in unchanged state");
             }
             catch (Exception e) {
-                var message = "Server should not have rejected save of TodoItem entity with the error " + e.Message;
+                var message = "Server should not have rejected save of TodoItem entities with the error " + e.Message;
                 Assert.Fail(message);
             }
 
             var entitiesInCache = entityManager.GetEntities();
-            Assert.AreEqual(entitiesInCache.Count(), 2, "There should be only two entities is cache after save of deleted entity");
+            Assert.AreEqual(entitiesInCache.Count(), 2, "There should be only two entities in cache after save of deleted entity");
 
-            Assert.IsTrue(!entitiesInCache.Where(todo => todo == deleteTodo).Any(), "Deleted entity should not be in cache");
+            Assert.IsTrue(!entitiesInCache.Any(td => td == deleteTodo), "Deleted entity should not be in cache");
         }
 
         [TestMethod]
@@ -374,9 +382,14 @@ namespace Test_NetClient
             * That is terrible! 
             * DON'T USE THIS FEATURE UNLESS YOU KNOW WHY
             *********************************************************/
-            var todo2 = entityManager.CreateEntity<TodoItem>();
-            var uniqueDescription2 = DateTime.Now.ToString();
-            todo2.Description = uniqueDescription2;
+
+            var now                 = DateTime.Now;
+            var todo2               = entityManager.CreateEntity<TodoItem>();
+            todo2.CreatedAt         = now;
+            var uniqueDescription2  = now.ToString();
+            todo2.Description       = uniqueDescription2;
+
+            // AllowConcurrentSaves is third parameter
             var options = new SaveOptions(null, null, true, null);
 
             try {
@@ -390,7 +403,8 @@ namespace Test_NetClient
             await Task.WhenAll(saveTask1, saveTask2);
             var todos2 = await new EntityQuery<TodoItem>().Where(td => td.Description == uniqueDescription2).Execute(entityManager);
             var count2 = todos2.Count();
-            Assert.AreEqual(2, count2, "After concurrent save, there should be two entities in databse");
+            Assert.AreEqual(2, count2, "After concurrent save, there should be two entities in database");
+            Assert.IsTrue(todos2.All(td => td.CreatedAt == now && td.Description == uniqueDescription2), "After concurrent save, the two saved entities should be identical");
 
 
             /*********************************************************
@@ -421,41 +435,45 @@ namespace Test_NetClient
             Assert.IsTrue(todos3.Count() == 1 && todos4.Count() == 1, "After concurrent save from separate entity managers, both entities should be in database");
         }
 
-        [TestMethod]
-        public async Task QueuedSaves() {
-            var entityManager = await TestFns.NewEm(_todosServiceName);
+        #region Queued saves
 
-            /*********************************************************
-            * QueuedSaves options ensures saves executed sequentially,
-            * each saving pending changes at the moment it is started
-            *********************************************************/
+        //[TestMethod]
+        //public async Task QueuedSaves() {
+        //    var entityManager = await TestFns.NewEm(_todosServiceName);
 
-            //entityManager.EnableSaveQueueing = true;
-            Task saveTask1 = null;
-            Task saveTask2 = null;
-            Task saveTask3 = null;
+        //    /*********************************************************
+        //    * QueuedSaves options ensures saves executed sequentially,
+        //    * each saving pending changes at the moment it is started
+        //    *********************************************************/
 
-            try {
-            var todo1 = entityManager.CreateEntity<TodoItem>();
-            todo1.Description = DateTime.Now.ToString(); ;
-            saveTask1 = entityManager.SaveChanges();
+        //    //entityManager.EnableSaveQueueing = true;
+        //    Task saveTask1 = null;
+        //    Task saveTask2 = null;
+        //    Task saveTask3 = null;
 
-            var todo2 = entityManager.CreateEntity<TodoItem>();
-            todo2.Description = DateTime.Now.ToString(); ;
-            saveTask2 = entityManager.SaveChanges();
+        //    try {
+        //    var todo1 = entityManager.CreateEntity<TodoItem>();
+        //    todo1.Description = DateTime.Now.ToString(); ;
+        //    saveTask1 = entityManager.SaveChanges();
 
-            var todo3 = entityManager.CreateEntity<TodoItem>();
-            todo3.Description = DateTime.Now.ToString(); ;
-            saveTask3 = entityManager.SaveChanges();
-            } catch (Exception e) {
-                Assert.Fail("With save queueing enabled, concurrent SaveChanges() calls should not fail with message: " + e.Message);
-            }
+        //    var todo2 = entityManager.CreateEntity<TodoItem>();
+        //    todo2.Description = DateTime.Now.ToString(); ;
+        //    saveTask2 = entityManager.SaveChanges();
 
-            await Task.WhenAll(saveTask1, saveTask2, saveTask3);
+        //    var todo3 = entityManager.CreateEntity<TodoItem>();
+        //    todo3.Description = DateTime.Now.ToString(); ;
+        //    saveTask3 = entityManager.SaveChanges();
+        //    } catch (Exception e) {
+        //        Assert.Fail("With save queueing enabled, concurrent SaveChanges() calls should not fail with message: " + e.Message);
+        //    }
+
+        //    await Task.WhenAll(saveTask1, saveTask2, saveTask3);
                    
-            Assert.IsFalse(entityManager.HasChanges(), "Entity manager should not have pending changes after all saves have completed");
-        }
-   
+        //    Assert.IsFalse(entityManager.HasChanges(), "Entity manager should not have pending changes after all saves have completed");
+        //}
+
+        #endregion Queued saves
+
         #region Unmapped Properties
 
         /*********************************************************
