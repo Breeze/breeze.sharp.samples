@@ -82,6 +82,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="NavigationTests.cs" />
     <Compile Include="SaveTests.cs" />
     <Compile Include="TestFns.cs" />
     <Compile Include="QueryTests.cs" />

@@ -615,7 +615,7 @@ namespace Test_NetClient
         #endregion Using specialized server controller methods
 
         #region Original contents of Breeze.sharp.internal.tests QueryTests.cs
-
+        /*
         //=======================================================================================================================================
 
         //*********************************************************
@@ -1042,6 +1042,7 @@ namespace Test_NetClient
             Assert.IsTrue(r0.All(o => o.OrderDetails.Any(od => od.Product.Category != null)));
 
         }
+        */
 
         #endregion Original contents of Breeze.sharp.internal.tests QueryTests.cs
     }
