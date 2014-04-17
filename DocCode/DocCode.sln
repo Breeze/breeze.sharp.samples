@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model_Inheritance.Sharp", "Client\Model_Inheritance.Sharp\Model_Inheritance.Sharp.csproj", "{58B41CC6-8D34-40C4-9342-DB55AE6CCA02}"
 EndProject
@@ -26,7 +26,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocCode.Server", "Server\Do
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{52F8F30E-D08C-4FC9-A2AA-A908FAEADFB0}"
 	ProjectSection(SolutionItems) = preProject
-		ReadMe1.txt = ReadMe1.txt
+		ReadMeFirst.txt = ReadMeFirst.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model_Todos.Sharp", "Client\Model_Todos.Sharp\Model_Todos.Sharp.csproj", "{F784CDB4-43D0-4105-B7C1-8F1DCFFB14AA}"

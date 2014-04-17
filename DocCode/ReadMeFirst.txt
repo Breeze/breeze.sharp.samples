@@ -1,3 +1,8 @@
+If you simply try to "Run" the tests in this solution they WILL fail.  This is because the server needs to be started first. 
+
+So:
+
+
 To debug into the client.
 
 	1) Simple start debugging into any unit test. The server will start automatically.

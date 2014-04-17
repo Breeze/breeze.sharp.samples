@@ -224,14 +224,14 @@ namespace Test_NetClient
             entityManager.Clear();
             var query = new EntityQuery<TodoItem>().Where(td => td.Id == id);
             var todos1 = await entityManager.ExecuteQuery(query);
-            Assert.IsTrue(todos1.Count() == 0, "Requery of saved Todo should yield one item");
+            Assert.IsTrue(todos1.Count() == 1, "Requery of saved Todo should yield one item");
             var todo1 = todos1.First();
             Assert.IsTrue(todo1.Description == description, "Requeried entity should have saved values");
 
             // Requery into new entity manager
             var entityManager2 = await TestFns.NewEm(_todosServiceName);
-            var todos2 = await entityManager.ExecuteQuery(query);
-            Assert.IsTrue(todos2.Count() == 0, "Requery of saved Todo should yield one item");
+            var todos2 = await entityManager2.ExecuteQuery(query);
+            Assert.IsTrue(todos2.Count() == 1, "Requery of saved Todo should yield one item");
             var todo2 = todos2.First();
             Assert.IsTrue(todo2.Description == description, "Requeried entity should have saved values");
 
@@ -249,10 +249,10 @@ namespace Test_NetClient
             // Get two Todos to modify and delete
             var twoQuery = new EntityQuery<TodoItem>().Take(2);
             var todos = await entityManager.ExecuteQuery(twoQuery);
-            Assert.IsTrue(todos.Count() == 2, "Take(2) query should return two itmes");
+            Assert.IsTrue(todos.Count() == 2, "Take(2) query should return two items");
 
             var updateTodo = todos.First();
-            updateTodo.Description = "Updated Todo";
+            updateTodo.Description = TestFns.MorphString(updateTodo.Description);
 
             var deleteTodo = todos.Skip(1).First();
             deleteTodo.EntityAspect.Delete();
@@ -263,10 +263,10 @@ namespace Test_NetClient
             try {
                 var saveResult = await entityManager.SaveChanges();
                 Assert.AreEqual(saveResult.Entities.Count(), 3, "There should be three saved entities");
-                saveResult.Entities.ForEach(todo =>
-                    {
-                        Assert.IsTrue(todo.EntityAspect.EntityState.IsUnchanged(), "All saved entities should be in unchanged state");
-                    });
+                saveResult.Entities.ForEach(todo => {
+                  var entityState = todo.EntityAspect.EntityState;
+                  Assert.IsTrue(entityState.IsUnchanged() || entityState.IsDetached(), "All saved entities should be in unchanged state");
+                });
             }
             catch (Exception e) {
                 var message = "Server should not have rejected save of TodoItem entity with the error " + e.Message;
@@ -290,6 +290,7 @@ namespace Test_NetClient
             // Add a new Todo
             var newTodo         = entityManager.CreateEntity<TodoItem>();
             newTodo.Description = "New Todo Item";
+            newTodo.CreatedAt = DateTime.Today;
             Assert.AreEqual(1, eventCount, "Only one HasChangedChanged event should be signalled when entity added");
             Assert.IsTrue(lastEventArgs.HasChanges, "HasChanagesChanged should signal true after new entity added");
             eventCount = 0;
@@ -311,8 +312,9 @@ namespace Test_NetClient
             // Add another new Todo
             var newTodo2         = entityManager.CreateEntity<TodoItem>();
             newTodo2.Description  = "New Todo Item2";
+            // newTodo2.CreatedAt = DateTime.Today;
             Assert.AreEqual(1, eventCount, "Only one HasChangedChanged event should be signalled when entity added");
-            Assert.IsTrue(lastEventArgs.HasChanges, "HasChanagesChanged should signal true after new entity added");
+            Assert.IsTrue(lastEventArgs.HasChanges, "HasChangesChanged should signal true after new entity added");
             eventCount = 0;
 
             // Save changes
