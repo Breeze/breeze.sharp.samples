@@ -30,8 +30,11 @@ namespace Test_NetClient_Misc
     [TestClass]
     public class MiscTests
     {
+        private String _todosServiceName;
+
         [TestInitialize]
         public void TestInitializeMethod() {
+            _todosServiceName = "http://localhost:56337/breeze/Todos/";
         }
 
         [TestCleanup]
@@ -43,25 +46,49 @@ namespace Test_NetClient_Misc
 
             // Allow use of a partial model
             MetadataStore.Instance.AllowedMetadataMismatchTypes = MetadataMismatchType.AllAllowable;
+            MetadataStore.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
 
-            // This fixes the problem
-            //MetadataStore.Instance.NamingConvention.AddClientServerNamespaceMapping("Test_NetClient_Misc", "Todo.Models");
+            var entityManager = new EntityManager(_todosServiceName);
+
+            // Query all TodoItems - Default resource is "TodoItems" which is und
+            try {
+                await new EntityQuery<TodoItem>().Execute(entityManager);
+                Assert.Fail("Server should throw exception when undefined resource is queried");
+            }
+            catch (Exception e) {
+                Assert.IsFalse(e.Message.Contains("<!DOCTYPE html"), "Exception for undefined resource should be explanatory");
+            }
+            finally {
+                MetadataStore.__Reset();
+                Assert.IsFalse(MetadataStore.Instance.EntityTypes.Any(), "After hard reset, there should not be any entity types in the MetadataStore");
+
+            }
+
+        }
+
+        [TestMethod]
+        public async Task NamingConvention() {
+
+            // Allow use of a partial model
+            MetadataStore.Instance.AllowedMetadataMismatchTypes = MetadataMismatchType.AllAllowable;
+
+            // Inform MetadataStore that our local TodoItem is in a different namespace from server
+            MetadataStore.Instance.NamingConvention.AddClientServerNamespaceMapping("Test_NetClient_Misc", "Todo.Models");
 
             MetadataStore.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
 
-            // Create EntityManager
-            var publicServiceAddress = "http://sampleservice.breezejs.com/api/todos/";
-            var localServiceAddress = "http://localhost:56337/breeze/Todos/";
-            var entityManager = new EntityManager(localServiceAddress);
+            var entityManager = new EntityManager(_todosServiceName);
 
-            // Query all TodoItems
+            // Query all TodoItems - Resource will be "Todos" as downloaded with the metadata
             try {
-            var result = await new EntityQuery<TodoItem>().Execute(entityManager);
-            var itemCount = result.Count();
-            Assert.AreEqual(6, itemCount, "Should retrieve 6 TodoItems");
+                await new EntityQuery<TodoItem>().Execute(entityManager);
             }
             catch (Exception e) {
-                Assert.Fail("Server threw exception with HTML in message: " + e.Message);
+                Assert.Fail("Use of NamingConvention should allow client and server entity models in different namespaces");
+            }
+            finally {
+                MetadataStore.__Reset();
+                Assert.IsFalse(MetadataStore.Instance.EntityTypes.Any(), "After hard reset, there should not be any entity types in the MetadataStore");
             }
 
         }

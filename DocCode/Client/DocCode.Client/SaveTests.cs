@@ -348,6 +348,8 @@ namespace Test_NetClient
         [TestMethod]
         public async Task ConcurrentSaves() {
             var entityManager = await TestFns.NewEm(_todosServiceName);
+            Task saveTask1 = null;
+            Task saveTask2 = null;
 
             /*********************************************************
             * Concurrent save throws exceptions by default
@@ -356,8 +358,6 @@ namespace Test_NetClient
             var uniqueDescription1 = DateTime.Now.ToString();
             todo.Description = uniqueDescription1;
 
-            Task saveTask1 = null;
-            Task saveTask2 = null;
 
             // Default behavior is to disallow concurrent calls to SaveChanges()
 
@@ -375,7 +375,14 @@ namespace Test_NetClient
             var todos1 = await new EntityQuery<TodoItem>().Where(td => td.Description == uniqueDescription1).Execute(entityManager);
             var count1 = todos1.Count();
             Assert.AreEqual(1, count1, "After disallowed concurrent save, there should be only one entity in databse");
+        }
 
+
+        [TestMethod]
+        public async Task AllowConcurrentSaves() {
+            var entityManager = await TestFns.NewEm(_todosServiceName);
+            Task saveTask1 = null;
+            Task saveTask2 = null;
 
             /*********************************************************
             * Second save w/ 'allowConcurrentSaves'  - saves a new entity twice!
@@ -383,41 +390,52 @@ namespace Test_NetClient
             * DON'T USE THIS FEATURE UNLESS YOU KNOW WHY
             *********************************************************/
 
-            var now                 = DateTime.Now;
-            var todo2               = entityManager.CreateEntity<TodoItem>();
-            todo2.CreatedAt         = now;
-            var uniqueDescription2  = now.ToString();
-            todo2.Description       = uniqueDescription2;
+            TestFns.RunInWpfSyncContext(async () =>
+                {
+                    var now = DateTime.Now;
+                    var todo2 = entityManager.CreateEntity<TodoItem>();
+                    todo2.CreatedAt = now;
+                    var uniqueDescription2 = now.ToString();
+                    todo2.Description = uniqueDescription2;
 
-            // AllowConcurrentSaves is third parameter
-            var options = new SaveOptions(null, null, true, null);
+                    // AllowConcurrentSaves used to be third parameter but it appears that this is the default anyway
+                    var options = new SaveOptions(null, null, /* true, */ null);
 
-            try {
-                saveTask1 = entityManager.SaveChanges(options);        // Should succeed
-                saveTask2 = entityManager.SaveChanges(options);        // Should succeed
-            }
-            catch (Exception e) {
-                var message = "With allowConcurrentSaves = true, concurrent SaveChanges() calls should not fail with message: " + e.Message;
-                Assert.Fail(message);
-            }
-            await Task.WhenAll(saveTask1, saveTask2);
-            var todos2 = await new EntityQuery<TodoItem>().Where(td => td.Description == uniqueDescription2).Execute(entityManager);
-            var count2 = todos2.Count();
-            Assert.AreEqual(2, count2, "After concurrent save, there should be two entities in database");
-            Assert.IsTrue(todos2.All(td => td.CreatedAt == now && td.Description == uniqueDescription2), "After concurrent save, the two saved entities should be identical");
+                    try {
+                        saveTask1 = entityManager.SaveChanges(options);        // Should succeed
+                        saveTask2 = entityManager.SaveChanges(options);        // Should succeed
+                    }
+                    catch (Exception e) {
+                        var message = "With allowConcurrentSaves = true, concurrent SaveChanges() calls should not fail with message: " + e.Message;
+                        Assert.Fail(message);
+                    }
+                    await Task.WhenAll(saveTask1, saveTask2);
+                    var todos2 = await new EntityQuery<TodoItem>().Where(td => td.Description == uniqueDescription2).Execute(entityManager);
+                    var count2 = todos2.Count();
+                    Assert.AreEqual(2, count2, "After concurrent save, there should be two entities in database");
+                    Assert.IsTrue(todos2.All(td => td.Description == uniqueDescription2), "After concurrent save, the two saved entities should be identical");
+                });
 
+        }
+
+
+        [TestMethod]
+        public async Task ConcurrentSavesWithSeparateEMs() {
+            var entityManager = await TestFns.NewEm(_todosServiceName);
+            Task saveTask1 = null;
+            Task saveTask2 = null;
 
             /*********************************************************
             * Concurrent save with separate managers is ok
             * as if two different users saved concurrently
             *********************************************************/
             var todo3 = entityManager.CreateEntity<TodoItem>();
-            var uniqueDescription3 = DateTime.Now.ToString();
+            var uniqueDescription3 = "T3_" + DateTime.Now.ToString();
             todo3.Description = uniqueDescription3;
 
             var entityManager2 = await TestFns.NewEm(_todosServiceName);
             var todo4 = entityManager2.CreateEntity<TodoItem>();
-            var uniqueDescription4 = DateTime.Now.ToString();
+            var uniqueDescription4 = "T4_" + DateTime.Now.ToString();
             todo4.Description = uniqueDescription4;
 
             try {

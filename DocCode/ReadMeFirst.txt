@@ -2,6 +2,7 @@ If you simply try to "Run" the tests in this solution they WILL fail.  This is b
 
 So:
 
+Be sure DocCode.Client is set as the startup project (!)
 
 To debug into the client.
 
