@@ -467,6 +467,7 @@ namespace Test_NetClient
 
         [TestMethod]
         public async Task ServerSideProjection() {
+            // Not yet reviewed - JJT
             try {
                 var entityManager = await TestFns.NewEm(_serviceName);
 
@@ -550,6 +551,7 @@ namespace Test_NetClient
 
         [TestMethod]
         public async Task Lookups() {
+            // Not yet reviewed - JJT
             try {
                 var entityManager = await TestFns.NewEm(_serviceName);
 
