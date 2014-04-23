@@ -82,6 +82,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ExportImportTests.cs" />
     <Compile Include="MiscTests.cs" />
     <Compile Include="NavigationTests.cs" />
     <Compile Include="SaveTests.cs" />
