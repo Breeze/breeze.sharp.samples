@@ -113,7 +113,7 @@ namespace Test_NetClient
 
             var exportData = manager.ExportEntities();
 
-            var manager2 = new EntityManager(manager);
+            var manager2 = new EntityManager(_serviceName);
             var importResult = manager2.ImportEntities(exportData);
 
             Assert.AreEqual(expectedEntityCount, importResult.ImportedEntities.Count);
@@ -187,7 +187,7 @@ namespace Test_NetClient
             Assert.AreEqual(1, importData3.ImportedEntities.Count);
             manager2.Clear();
 
-            var selectedCustomerQuery = new EntityQuery<Customer>().Where(customer => customer.CompanyName.StartsWith("P"));
+            var selectedCustomerQuery = new EntityQuery<Customer>().Where(customer => customer.City.StartsWith("P"));
             var selectedCustomers = manager.ExecuteQueryLocally(selectedCustomerQuery); // cache-only query returns synchronously
             var exportData4 = manager.ExportEntities(selectedCustomers); // the 'P' customers 
             var importData4 = manager2.ImportEntities(exportData4);
@@ -197,15 +197,15 @@ namespace Test_NetClient
         [TestMethod]
         public async Task ExportImportEntitiesWithoutMetadata()
         {
-            var manager = new EntityManager(_serviceName);
-            await PrimeCache(manager);
-            var selectedEntities = manager.GetEntities<Customer>().ToList();
+            var manager1 = new EntityManager(_serviceName);
+            await PrimeCache(manager1);
+            var selectedEntities = manager1.GetEntities<Customer>().ToList();
 
             // export the selected entities without metadata
-            var exportData = manager.ExportEntities(selectedEntities, false);
+            var exportData = manager1.ExportEntities(selectedEntities, false);
 
-            // Creates a new EntityManager with the same configuration as another EntityManager but without any entities.
-            var manager2 = new EntityManager(manager);
+            // creates a new EntityManager with the same configuration as another EntityManager but without any entities
+            var manager2 = new EntityManager(manager1);
             var importResult = manager2.ImportEntities(exportData);
 
             Assert.AreEqual(selectedEntities.Count(), importResult.ImportedEntities.Count);
