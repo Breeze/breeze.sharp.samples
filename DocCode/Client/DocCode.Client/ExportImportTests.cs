@@ -4,7 +4,6 @@ using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Threading.Tasks;
 using Breeze.Sharp;
-using Breeze.Sharp.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Northwind.Models;
 
@@ -127,21 +126,27 @@ namespace Test_NetClient
             var manager1 = new EntityManager(_serviceName);
             await PrimeCache(manager1);
 
+            // modify all the customers in manager1
+            var parisCustomers = manager1.GetEntities<Customer>().ToList();
+            parisCustomers.ForEach(c => c.City = "Paris");
+
             var exportData = manager1.ExportEntities();
 
             var manager2 = new EntityManager(_serviceName);
             await PrimeCache(manager2);
-            
-            // modify all the customers in manager2 
-            var customers = manager2.GetEntities<Customer>().ToList();
-            customers.ForEach(c => c.City = "London");
 
-            // changes are preserved by default
+            // modify all the "same" customers in manager2 
+            var londonCustomers = manager2.GetEntities<Customer>().ToList();
+            londonCustomers.ForEach(c => c.City = "London");
+
+            // changes in manager2 are preserved by default
             var importResult = manager2.ImportEntities(exportData);
 
             // so nothing should have been imported
             Assert.AreEqual(0, importResult.ImportedEntities.Count);
-            Assert.AreEqual(customers.Count, manager2.GetEntities().Count());
+            Assert.AreEqual(londonCustomers.Count, manager2.GetEntities().Count());
+            // all the customers should still be in "London"
+            Assert.IsTrue(manager2.GetEntities<Customer>().All(c => c.City == "London"), "All cities should = London");
         }
 
         [TestMethod]
@@ -163,9 +168,10 @@ namespace Test_NetClient
             var londonCustomers = manager2.GetEntities<Customer>().ToList();
             londonCustomers.ForEach(c => c.City = "London");
 
-            // overwrite changes with the exported data
+            // overwrite changes in manager2 with the exported data
             manager2.ImportEntities(exportData, new ImportOptions(MergeStrategy.OverwriteChanges));
-            Assert.IsTrue(manager2.GetEntities<Customer>().All(c => c.City == "Paris"));
+            // all the customers should now be in "Paris"
+            Assert.IsTrue(manager2.GetEntities<Customer>().All(c => c.City == "Paris"), "All cities should = Paris");
         }
 
         [TestMethod]
@@ -226,8 +232,7 @@ namespace Test_NetClient
         public async Task TemporaryKeyNotPreservedOnImport()
         {
             var manager1 = new EntityManager(_serviceName);
-            await manager1.FetchMetadata(); // Must call this to ensure KeyProperties are defined on the entity
-                                            // before calling CreateEntity().
+            await manager1.FetchMetadata(); // Metadata must be fetched before CreateEntity() can be called
 
             // Create a new Order. The Order key is store-generated.
             // Until saved, the new Order has a temporary key such as '-1'.
@@ -281,6 +286,59 @@ namespace Test_NetClient
         public void ValidateExportedEntitiesUponImport()
         {
             Assert.Inconclusive("Feature: Requires ImportEntities(string exportedString, object config)");
+        }
+
+        [TestMethod]
+        public async Task ImportChangedEntityAndRestoreItsOriginalState()
+        {
+            var manager = new EntityManager(_serviceName);
+            await manager.FetchMetadata(); // Metadata must be fetched before CreateEntity() can be called
+
+            // Suppose we are editing a customer
+            const string originalCustomerName = "Foo";
+            var customer =
+                manager.CreateEntity<Customer>(new {CustomerID = Guid.NewGuid(), CompanyName = originalCustomerName},
+                                               EntityState.Unchanged);
+
+            // We change his CompanyName
+            customer.CompanyName = "Bar";
+
+            // We export and stash these changes offline
+            // because we are not ready to save them
+            // (in the test we just export)
+            var exportData = manager.ExportEntities();
+
+            // We re-run the app later with a clean manager
+            manager.Clear();
+
+            var imported = manager.ImportEntities(exportData);
+            customer = imported.ImportedEntities.Cast<Customer>().First();
+
+            // We want to revert our changes and restore the customer to its original state
+            customer.EntityAspect.RejectChanges();
+
+            Assert.AreEqual(originalCustomerName, customer.CompanyName);
+        }
+
+        [TestMethod]
+        public async Task ExportImportUnchangedEntities()
+        {
+            var manager = new EntityManager(_serviceName);
+            await PrimeCache(manager);
+
+            // modify one of the entities
+            var customer = manager.GetEntities<Customer>().First();
+            customer.City = "Paris";
+            var expectedUnchangedEntityCount = manager.GetEntities().Count() - 1;
+
+            // export only Unchanged entities
+            var exportData = manager.ExportEntities(manager.GetEntities(EntityState.Unchanged));
+
+            // import into a new EntityManager
+            var manager2 = new EntityManager(_serviceName);
+            manager2.ImportEntities(exportData);
+
+            Assert.AreEqual(expectedUnchangedEntityCount, manager2.GetEntities().Count());
         }
 
         private async Task PrimeCache(EntityManager manager)
