@@ -82,6 +82,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="QueryWithAFilterTests.cs" />
     <Compile Include="CreateEntityTests.cs" />
     <Compile Include="ExportImportTests.cs" />
     <Compile Include="MiscTests.cs" />
