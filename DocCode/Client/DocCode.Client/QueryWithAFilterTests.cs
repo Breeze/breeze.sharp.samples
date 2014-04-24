@@ -51,6 +51,7 @@ namespace Test_NetClient
             Assert.AreEqual(1, wineTodos.Count(), "Got " + wineTodos.Count() + " wine TodoItems");
 
             //Snippet5
+            // Execute above query locally
             var localWineTodos = manager.ExecuteQueryLocally(query4);
             Assert.AreEqual(1, localWineTodos.Count(), "Got " + localWineTodos.Count() + " local wine TodoItems");
         }
