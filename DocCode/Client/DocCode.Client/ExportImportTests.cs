@@ -268,7 +268,7 @@ namespace Test_NetClient
 
             // breeze had to update the acme key in manager2 because 'beta' already has ID==-1   
             var isSameId = acme1.OrderID == acme2.OrderID; // false; temporary keys are different
-            Assert.IsFalse(isSameId, "OrderIDs have changed");
+            Assert.IsFalse(isSameId, "OrderIDs (temporary keys) should be different");
 
         }
         
