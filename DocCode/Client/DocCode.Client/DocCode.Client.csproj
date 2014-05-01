@@ -93,6 +93,7 @@
     <Compile Include="QueryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="InsideEntityTests.cs" />
+    <Compile Include="ValidationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Model_Northwind.Sharp\Model_Northwind.Sharp.csproj">
