@@ -75,12 +75,18 @@ namespace Test_NetClient
         {
             // change the default options, turning off "OnAttach"
             var valOpts = new ValidationOptions { ValidationApplicability = ValidationApplicability.OnPropertyChange | ValidationApplicability.OnSave };
-
+          
+          var oldValOpts = ValidationOptions.Default;
+          try {
             // make custom ValidationOptions the default for all future managers
             ValidationOptions.Default = valOpts;
 
             var manager = new EntityManager(_serviceName); // new empty EntityManager
             Assert.AreEqual(valOpts, manager.ValidationOptions);
+          }
+          finally {
+            ValidationOptions.Default = oldValOpts;
+          }
         }
 
         [TestMethod]
@@ -155,7 +161,7 @@ namespace Test_NetClient
             }
             finally
             {
-                validators.Remove(new RequiredValidator());
+                Assert.IsTrue(validators.Remove(new RequiredValidator()));
             }
         }
 
@@ -206,8 +212,8 @@ namespace Test_NetClient
             }
             finally
             {
-                customer.EntityAspect.EntityType.GetProperty("Country")
-                        .Validators.Remove(new CountryIsUsValidator());
+                Assert.IsTrue(customer.EntityAspect.EntityType.GetProperty("Country")
+                        .Validators.Remove(new CountryIsUsValidator()));
             }
         }
 
@@ -241,8 +247,8 @@ namespace Test_NetClient
             }
             finally
             {
-                employee.EntityAspect.EntityType.GetProperty("Country")
-                        .Validators.Remove(new CountryIsUsValidator());                
+                Assert.IsTrue(employee.EntityAspect.EntityType.GetProperty("Country")
+                        .Validators.Remove(new CountryIsUsValidator()));                
             }
         }
 
@@ -279,7 +285,7 @@ namespace Test_NetClient
             }
             finally
             {
-                customerType.Validators.Remove(new ZipCodeValidator());
+                Assert.IsTrue(customerType.Validators.Remove(new ZipCodeValidator()));
             }
         }
 
@@ -311,7 +317,7 @@ namespace Test_NetClient
                 Assert.IsTrue(errmsgs.Any(), String.Format("should have 1 error: {0}", errmsgs.First().Message));
 
                 // remove validation rule
-                validators.Remove(alwaysWrongValidator);
+                Assert.IsTrue(validators.Remove(alwaysWrongValidator));
 
                 // Clear out the "alwaysWrong" error
                 // Must do manually because that rule is now gone
@@ -393,12 +399,13 @@ namespace Test_NetClient
 
             var employeeType = manager.MetadataStore.GetEntityType(typeof(Employee)); //get the Employee type
 
-            var emailValidator = new RegexValidator(@"^((\([2-9]\d{2}\) ?)|([2-9]\d{2}[-.]))\d{3}[-.]\d{4}$"); // email pattern
+            var phoneValidator = new PhoneNumberValidator();
+            // or the hard way ... :)
+            // var phoneValidator = new RegexValidator(@"^((\([2-9]\d{2}\) ?)|([2-9]\d{2}[-.]))\d{3}[-.]\d{4}$", "phone number"); // email pattern
             try
             {
                 // add regex validator that validates emails to the HomePhone property
-                employeeType.GetProperty("HomePhone")
-                            .Validators.Add(emailValidator); 
+                employeeType.GetProperty("HomePhone").Validators.Add(phoneValidator); 
 
                 var employee = new Employee { FirstName = "Jane", LastName = "Doe" };
                 employee.HomePhone = "N2L 3G1"; // a bad phone number
@@ -415,7 +422,7 @@ namespace Test_NetClient
             }
             finally
             {
-                employeeType.Validators.Remove(emailValidator);
+                Assert.IsTrue(employeeType.GetProperty("HomePhone").Validators.Remove(phoneValidator));
             }
         }
 
@@ -501,45 +508,6 @@ namespace Test_NetClient
             {
                 return LocalizedMessage.Format(validationContext.PropertyValue);
             }
-        }
-
-        /// <summary>
-        /// NOTE: REMOVE WHEN THIS BECOMES AVAILABLE IN BREEZE.SHARP
-        /// 
-        /// Validator implementation that determines if a given property matches a
-        /// predefined regular expression pattern.
-        /// </summary>
-        public class RegexValidator : Validator
-        {
-            /// <summary>
-            /// Ctor.
-            /// </summary>
-            /// <param name="pattern"></param>
-            public RegexValidator(string pattern)
-                : base()
-            {
-                LocalizedMessage = new LocalizedMessage("'{0}' must match this pattern {1}");
-                Regex = new Regex(pattern);
-            }
-
-            /// <inheritdoc />
-            protected override bool ValidateCore(ValidationContext context)
-            {
-                var value = context.PropertyValue;
-                return value == null || Regex.IsMatch((string)value);
-            }
-
-            /// <inheritdoc />
-            public override String GetErrorMessage(ValidationContext context)
-            {
-                // '{0}' must be a valid {1} pattern
-                return LocalizedMessage.Format(context.DisplayName, this.Regex.ToString());
-            }
-
-            /// <summary>
-            /// The Regex1 pattern to match.
-            /// </summary>
-            public Regex Regex { get; private set; }
         }
 
         /// <summary>

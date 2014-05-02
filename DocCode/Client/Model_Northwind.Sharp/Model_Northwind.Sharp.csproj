@@ -32,21 +32,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="breeze.sharp, Version=0.5.3.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="breeze.sharp, Version=0.5.3.5, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.1\lib\portable-net45+wp80+win\breeze.sharp.dll</HintPath>
+      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.5\lib\portable-net45+wp80+win\breeze.sharp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Data.Edm.Portable, Version=5.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.1\lib\portable-net45+wp80+win\Microsoft.Data.Edm.Portable.dll</HintPath>
+      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.5\lib\portable-net45+wp80+win\Microsoft.Data.Edm.Portable.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Data.OData.Portable, Version=5.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.1\lib\portable-net45+wp80+win\Microsoft.Data.OData.Portable.dll</HintPath>
+      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.5\lib\portable-net45+wp80+win\Microsoft.Data.OData.Portable.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Data.Services.Client.Portable, Version=5.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.1\lib\portable-net45+wp80+win\Microsoft.Data.Services.Client.Portable.dll</HintPath>
+      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.5\lib\portable-net45+wp80+win\Microsoft.Data.Services.Client.Portable.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -61,7 +61,7 @@
     </Reference>
     <Reference Include="System.Spatial.Portable, Version=5.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.1\lib\portable-net45+wp80+win\System.Spatial.Portable.dll</HintPath>
+      <HintPath>..\..\packages\Breeze.Sharp.0.5.3.5\lib\portable-net45+wp80+win\System.Spatial.Portable.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
