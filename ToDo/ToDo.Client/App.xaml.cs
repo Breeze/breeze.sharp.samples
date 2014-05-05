@@ -30,7 +30,7 @@ namespace Todo_Net
             var serviceAddress = "http://localhost:63030/breeze/Todos/";
             //var serviceAddress = "http://sampleservice.breezejs.com/api/todos/";
             var assembly = typeof(TodoItem).Assembly;
-            var rslt = MetadataStore.Instance.ProbeAssemblies(assembly);
+            var rslt = Configuration.Instance.ProbeAssemblies(assembly);
             var entityManager = new EntityManager(serviceAddress);
 
             // Create the main viewModel and view

@@ -258,7 +258,7 @@ namespace Todo_Net
         }
 
         private TodoItem CreateTodoItem() {
-            var todoType = MetadataStore.Instance.GetEntityType(typeof(TodoItem));
+            var todoType = _em.MetadataStore.GetEntityType(typeof(TodoItem));
             var todo = todoType.CreateEntity() as TodoItem;
             todo.CreatedAt = DateTime.Now;
             return todo;
