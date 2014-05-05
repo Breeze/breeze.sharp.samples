@@ -21,7 +21,7 @@ namespace Test_NetClient {
 
     [TestInitialize]
     public void TestInitializeMethod() {
-      MetadataStore.Instance.ProbeAssemblies(typeof(Customer).Assembly);
+      Configuration.Instance.ProbeAssemblies(typeof(Customer).Assembly);
       _serviceName = "http://localhost:56337/breeze/Northwind/";
     }
 
@@ -34,21 +34,25 @@ namespace Test_NetClient {
     [TestMethod]
     public void MetadataNeededToGetEntityKey() {
 
-      Assert.Inconclusive("Test depends on static MetadataStore state.  Results valid only if test is run alone.");
-
       // Metadata is necessary to get entity key
       // Must be first test to be meaningful, since CanFetchMetadata() below fetches 
       // metadata into the static instance of MetadataStore
       var entityManager = new EntityManager(_serviceName);
-      var customerType = MetadataStore.Instance.GetEntityType(typeof(Customer));
-      Assert.IsNotNull(customerType);
 
+      
+      var customerType = entityManager.MetadataStore.GetEntityType(typeof(Customer));
+      Assert.IsNotNull(customerType);
+      EntityKey key;
       try {
-        var key = new EntityKey(customerType, _alfredsID);
+        key = new EntityKey(customerType, _alfredsID);
         Assert.Fail("EntityKey constructor should fail if metadata not fetched");
       } catch (Exception e) {
         Assert.IsTrue(e.Message.Contains("There are no KeyProperties yet defined"), "Thrown exception should indicated key property is not defined.  Instead it says \"" + e.Message + "\"");
       }
+
+      var etb = new EntityTypeBuilder<Customer>(entityManager.MetadataStore);
+      etb.DataProperty(c => c.CustomerID).IsPartOfKey();
+      key = new EntityKey(customerType, _alfredsID);
     }
 
     [TestMethod]
@@ -133,7 +137,7 @@ namespace Test_NetClient {
       var entityManager = new EntityManager(_serviceName);
       await entityManager.FetchMetadata();
 
-      var customerType = MetadataStore.Instance.GetEntityType(typeof(Customer));
+      var customerType = entityManager.MetadataStore.GetEntityType(typeof(Customer));
       var key = new EntityKey(customerType, _alfredsID);
 
       // Fetch same entity twice
@@ -265,7 +269,7 @@ namespace Test_NetClient {
     }
 
     private void AssertGotOrderDetails(EntityManager entityManager, IEnumerable<Order> orders) {
-      var odType = MetadataStore.Instance.GetEntityType("OrderDetail");
+      var odType = entityManager.MetadataStore.GetEntityType("OrderDetail");
 
       // Check that there are order details in cache
       var odsInCache = entityManager.GetEntities<OrderDetail>();

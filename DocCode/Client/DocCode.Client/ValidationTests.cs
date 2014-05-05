@@ -18,7 +18,7 @@ namespace Test_NetClient
         [TestInitialize]
         public void TestInitializeMethod()
         {
-            MetadataStore.Instance.ProbeAssemblies(typeof(Customer).Assembly);
+            Configuration.Instance.ProbeAssemblies(typeof(Customer).Assembly);
             _serviceName = "http://localhost:56337/breeze/Northwind/";
         }
 
@@ -268,11 +268,11 @@ namespace Test_NetClient
                 // add US zip code validator to the entity (not to a property)
                 customerType.Validators.Add(new ZipCodeValidator());
 
-                var customer = new Customer { CompanyName = "Boogaloo Board Games" };
+                var customer = new Customer { CustomerID = Guid.NewGuid(), CompanyName = "Boogaloo Board Games" };
                 customer.Country = "USA";
                 customer.PostalCode = "N2L 3G1"; // a Canadian postal code
-
-                // force validation of unattached customer
+                manager.AddEntity(customer);
+                // force validation of  customer
                 var errors = customer.EntityAspect.Validate();
 
                 Assert.IsTrue(errors.Any(), String.Format("should have 1 error: {0}", errors.First().Message));

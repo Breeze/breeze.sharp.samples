@@ -18,7 +18,7 @@ namespace Test_NetClient
         [TestInitialize]
         public void TestInitializeMethod()
         {
-            MetadataStore.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
+            Configuration.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
             _serviceName = "http://localhost:56337/breeze/Todos/";
         }
 

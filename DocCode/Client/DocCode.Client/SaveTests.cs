@@ -25,8 +25,8 @@ namespace Test_NetClient
 
         [TestInitialize]
         public void TestInitializeMethod() {
-            MetadataStore.Instance.ProbeAssemblies(typeof(Customer).Assembly);
-            MetadataStore.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
+            Configuration.Instance.ProbeAssemblies(typeof(Customer).Assembly);
+            Configuration.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
             _northwindServiceName = "http://localhost:56337/breeze/Northwind/";
             _todosServiceName = "http://localhost:56337/breeze/Todos/";
         }

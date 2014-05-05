@@ -46,7 +46,7 @@ namespace Test_NetClient_Misc
 
         //    // Allow use of a partial model
         //    MetadataStore.Instance.AllowedMetadataMismatchTypes = MetadataMismatchType.AllAllowable;
-        //    MetadataStore.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
+        //    Configuration.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
 
         //    var entityManager = new EntityManager(_todosServiceName);
 
@@ -75,7 +75,7 @@ namespace Test_NetClient_Misc
         //    // Inform MetadataStore that our local TodoItem is in a different namespace from server
         //    MetadataStore.Instance.NamingConvention.AddClientServerNamespaceMapping("Test_NetClient_Misc", "Todo.Models");
 
-        //    MetadataStore.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
+        //    Configuration.Instance.ProbeAssemblies(typeof(TodoItem).Assembly);
 
         //    var entityManager = new EntityManager(_todosServiceName);
 

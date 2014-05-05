@@ -25,7 +25,7 @@ namespace Test_NetClient
         public async Task LookupLists1() {
             // Snippet1
             _serviceName = "http://localhost:56337/breeze/Northwind/";
-            MetadataStore.Instance.ProbeAssemblies(typeof(Customer).Assembly);
+            Configuration.Instance.ProbeAssemblies(typeof(Customer).Assembly);
             var entityManager = await TestFns.NewEm(_serviceName);
 
             // Snippet2
@@ -61,7 +61,7 @@ namespace Test_NetClient
         [TestMethod]
         public async Task LookupLists2() {
             _serviceName = "http://localhost:56337/breeze/Northwind/";
-            MetadataStore.Instance.ProbeAssemblies(typeof(Customer).Assembly);
+            Configuration.Instance.ProbeAssemblies(typeof(Customer).Assembly);
             var entityManager = await TestFns.NewEm(_serviceName);
 
             // Snippet4
@@ -95,7 +95,7 @@ namespace Test_NetClient
         [TestMethod]
         public async Task LookupLists3() {
             _serviceName = "http://localhost:56337/breeze/Northwind/";
-            MetadataStore.Instance.ProbeAssemblies(typeof(Customer).Assembly);
+            Configuration.Instance.ProbeAssemblies(typeof(Customer).Assembly);
             var entityManager = await TestFns.NewEm(_serviceName);
 
 

@@ -26,16 +26,29 @@ namespace Test_NetClient
 
     public static class TestFns
     {
-        public static async Task<EntityManager> NewEm(string serviceName) {
-            if (MetadataStore.Instance.GetDataService(serviceName) == null) {
-                var em = new EntityManager(serviceName);
-                await em.FetchMetadata();
-                return em;
-            }
-            else {
-                return new EntityManager(serviceName);
-            }
+      public static MetadataStore DefaultMetadataStore = new MetadataStore();
+
+      public static async Task<EntityManager> NewEm(string serviceName, MetadataStore metadataStore = null) {
+        metadataStore = metadataStore ?? DefaultMetadataStore;
+        if (metadataStore.GetDataService(serviceName) == null) {
+          var em = new EntityManager(serviceName, metadataStore);
+          await em.FetchMetadata();
+          return em;
+        } else {
+          return new EntityManager(serviceName, metadataStore);
         }
+      }
+
+      public static async Task<EntityManager> NewEm(DataService dataService, MetadataStore metadataStore = null) {
+        metadataStore = metadataStore ?? DefaultMetadataStore;
+        if (dataService.HasServerMetadata && metadataStore.GetDataService(dataService.ServiceName) == null) {
+          var em = new EntityManager(dataService.ServiceName, metadataStore);
+          await em.FetchMetadata();
+          return em;
+        } else {
+          return new EntityManager(dataService, metadataStore);
+        }
+      }
 
         public static void RunInWpfSyncContext(Func<Task> function) {
             if (function == null) throw new ArgumentNullException("function");
