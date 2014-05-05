@@ -231,12 +231,17 @@ namespace Test_NetClient
         [TestMethod]
         public async Task TemporaryKeyNotPreservedOnImport()
         {
+            // If an earlier test has already created an entity, a new entity will not be assigned a key value of -1
+            // Simulate initial launch of the client app
+            SimulateResetTempKeyGeneratorSeed();
+
             var manager1 = new EntityManager(_serviceName);
             await manager1.FetchMetadata(); // Metadata must be fetched before CreateEntity() can be called
 
             // Create a new Order. The Order key is store-generated.
             // Until saved, the new Order has a temporary key such as '-1'.
             var acme1 = manager1.CreateEntity<Order>(new {ShipName = "Acme"});
+            Assert.AreEqual(-1, acme1.OrderID, "Initial entity not assigned temp key -1");
  
             // export without metadata
             var exported = manager1.ExportEntities(new IEntity[] {acme1}, false);
