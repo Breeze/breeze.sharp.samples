@@ -122,7 +122,12 @@ namespace DocCode.DataAccess
         {
             get { return Context.Territories; }
         }
- 
+
+        public IQueryable<Role> Roles 
+        {
+            get { return Context.Roles; }
+        }
+
         // Demonstrate a "View Entity" a selection of "safe" entity properties
         // UserPartial is not in Metadata and won't be client cached unless
         // you define metadata for it on the Breeze client

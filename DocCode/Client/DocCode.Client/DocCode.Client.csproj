@@ -100,6 +100,7 @@
     <Compile Include="QueryTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="QueryDatatypeTests.cs" />
     <Compile Include="QueryWithAFilterTests.cs">
       <SubType>Code</SubType>
     </Compile>

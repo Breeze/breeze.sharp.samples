@@ -475,6 +475,15 @@ namespace Northwind.Models
   }
   #endregion Region class
 
+  public enum RoleType
+  {
+      Guest = 0,
+      Restricted = 1,
+      Standard = 2,
+      Admin = 3
+  }
+
+
   #region Role class
   public class Role {
 
@@ -488,6 +497,9 @@ namespace Northwind.Models
 
     [InverseProperty("Role")]
     public ICollection<UserRole> UserRoles { get; set; }
+
+    [Required]
+    public Nullable<RoleType> RoleType { get; set; }
 
   }
   #endregion Role class
