@@ -18,18 +18,33 @@ namespace Test_NetClient
         [TestInitialize]
         public void TestInitializeMethod()
         {
-            Configuration.Instance.ProbeAssemblies(typeof(Customer).Assembly);
+            Configuration.Instance.ProbeAssemblies(typeof(Role).Assembly);
             _serviceName = "http://localhost:56337/breeze/Northwind/";
+            //_serviceName = "http://localhost:7150/breeze/NorthwindIBModel";
         }
 
         [TestMethod]
         public async Task QueryRoles()
         {
-            Assert.Inconclusive("Query Roles fails with Internal Server Error");
+            //Assert.Inconclusive("See comments in the QueryRoles test");
+
+            // Issues:
+            //
+            // 1.  When the RoleType column was not present in the Role entity in the database (NorthwindIB.sdf), 
+            //     the query failed with "Internal Server Error".  A more explanatory message would be nice.  
+            //     The RoleType column has been added (nullable int), so this error no longer occurs.
+            //
+            // 2.  Comment out the RoleType property in the client model (Model.cs in Client\Model_Northwind.Sharp project lines 514-517).
+            //     In this case, the client throws a null reference exception in CsdlMetadataProcessor.cs.
+            //     This is the FIRST problem reported by the user.  A more informative message would be helpful.
+            //
+            // Note that this condition causes many other tests to fail as well.
+            //
+            // 3.  Uncomment the RoleType property in the client model.  Then the client throws in JsonEntityConverter.cs.
+            //     This is the SECOND problem reported by the user.  This looks like a genuine bug that should be fixed.
+            //
 
             var manager = new EntityManager(_serviceName);
-
-            try {
                 // Metadata must be fetched before CreateEntity() can be called
                 await manager.FetchMetadata();
 
@@ -37,12 +52,6 @@ namespace Test_NetClient
                 var allRoles = await manager.ExecuteQuery(query);
 
                 Assert.IsTrue(allRoles.Any(), "There should be some roles defined");
-            }
-            catch (Exception e) {
-                var exceptionType = e.GetType().Name;
-                var message = e.Message;
-                Assert.Fail(exceptionType + ": " + message);
-            }
         }
     }
 }

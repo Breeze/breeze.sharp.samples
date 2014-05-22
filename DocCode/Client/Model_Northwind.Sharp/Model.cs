@@ -512,8 +512,8 @@ namespace Northwind.Models {
       set { SetValue(value); }
     }
     public Nullable<RoleType> RoleType {
-      get { return GetValue<RoleType?>(); }
-      set { SetValue(value); }
+        get { return GetValue<RoleType?>(); }
+        set { SetValue(value); }
     }
 
     public NavigationSet<UserRole> UserRoles {
