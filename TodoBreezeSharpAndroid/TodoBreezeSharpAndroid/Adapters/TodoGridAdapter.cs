@@ -1,87 +1,105 @@
+using System.Globalization;
 using Android.App;
 using Android.Views;
 using Android.Widget;
 using System;
 using System.Collections.Generic;
 using Todo.Models;
+using TodoBreezeSharpAndroid.Services;
 
-namespace TodoBreezeSharpAndroid.Adapters {
-  class TodoGridAdapter : BaseAdapter {
-    Activity _context = null;
-    IList<TodoItem> _todos = new List<TodoItem>();
-    Breeze.Sharp.EntityManager _em;
-    TodoItem _item;
-    TextView _txtDescription;
-    CheckBox _checkboxIsDone;
-    public Button _deleteButton;
+namespace TodoBreezeSharpAndroid.Adapters
+{
 
-    public TodoGridAdapter(Activity context, IList<TodoItem> todosList, Breeze.Sharp.EntityManager em)
-      : base() {
-      this._context = context;
-      this._todos = todosList;
-      this._todos.Add(new TodoItem());
-      this._em = em;
+  class TodoGridAdapter : BaseAdapter
+  {
+    private readonly Activity _context;
+    private readonly IDataContext _dataContext;
+    private readonly List<TodoItem> _todoItems;
+
+    public TodoGridAdapter(Activity context, List<TodoItem> todoItems, IDataContext dataContext)
+    {
+      _context = context;
+      _dataContext = dataContext;
+      _todoItems = todoItems;
     }
 
-    public override int Count {
-      get { return _todos.Count; }
-    }
+    public override View GetView(int position, View convertView, ViewGroup parent)
+    {
+      var isNewView = convertView == null;
 
-    public override Java.Lang.Object GetItem(int position) {
-      return position;
-    }
+      var view = convertView ?? _context.LayoutInflater.Inflate(
+            Resource.Layout.TodoGrid,
+            parent,
+            false) as GridLayout;
 
-    public override long GetItemId(int position) {
-      return position;
-    }
+      System.Diagnostics.Debug.Assert(view != null, "TodoItem view is null?!?");
 
-    public override View GetView(int position, View convertView, ViewGroup parent) {
-      _item = _todos[position];
-      var gridView = _context.LayoutInflater.Inflate(
-        Resource.Layout.TodoGrid,
-        parent,
-        false) as GridLayout;
+      // View Controls
+      var delete = view.FindViewById<Button>(Resource.Id.DeleteButton);
+      var description = view.FindViewById<TextView>(Resource.Id.DescriptionText);
+      var isDone = view.FindViewById<CheckBox>(Resource.Id.IsDoneCheckbox);
 
-      _txtDescription = gridView.FindViewById<TextView>(Resource.Id.DescriptionText);
-      _checkboxIsDone = gridView.FindViewById<CheckBox>(Resource.Id.IsDoneCheckbox);
-      _deleteButton = gridView.FindViewById<Button>(Resource.Id.DeleteButton);
+      // Copy item data to the controls
+      var item = _todoItems[position];
+      view.Tag = position.ToString(CultureInfo.InvariantCulture);
+      description.SetText(item.Description, TextView.BufferType.Normal);
+      isDone.Checked = item.IsDone;
 
-      _txtDescription.SetText(_item.Description, TextView.BufferType.Normal);
-      if (_item.EntityAspect.IsDetached) {
-        _txtDescription.Hint = "Add new task";
-        _checkboxIsDone.Visibility = ViewStates.Invisible;
-        _deleteButton.Visibility = ViewStates.Invisible;
+      if (isNewView) {
+        // add event handlers to new views only
+        isDone.Click += (sender, e) => IsDoneClicked(view, isDone);
+        description.FocusChange += (sender, e) => DescriptionUpdate(view, description);
+        delete.Click += (sender, e) => DeleteClicked(view);        
       }
-      _checkboxIsDone.Checked = _item.IsDone;
-
-      _txtDescription.TextChanged += async (object sender, Android.Text.TextChangedEventArgs e) => {
-        _item = _todos[position];
-        _txtDescription = gridView.FindViewById<EditText>(Resource.Id.DescriptionText);
-        _item.Description = _txtDescription.Text;
-        if (_item.EntityAspect.IsDetached) {
-          _em.AddEntity(_item);
-          _todos.Add(new TodoItem());
-        }
-        await _em.SaveChanges();
-        //				    this.NotifyDataSetChanged();
-      };
-
-      _checkboxIsDone.CheckedChange += async (object sender, CompoundButton.CheckedChangeEventArgs e) => {
-        _item = _todos[position];
-        _checkboxIsDone = gridView.FindViewById<CheckBox>(Resource.Id.IsDoneCheckbox);
-        _item.IsDone = _checkboxIsDone.Checked;
-        await _em.SaveChanges();
-        //					this.NotifyDataSetChanged();
-      };
-
-      _deleteButton.Click += async (object sender, EventArgs e) => {
-        _item = _todos[position];
-        _item.EntityAspect.Delete();
-        _todos.RemoveAt(position);
-        await _em.SaveChanges();
-        this.NotifyDataSetChanged();
-      };
-      return gridView;
+      return view;
     }
+
+    private void DescriptionUpdate(View view, TextView description)
+    {
+      var item = GetViewItem(view);
+      item.Description = description.Text;
+      if (_dataContext.HasChanges) { _dataContext.Save(); }
+    }
+
+    private void DeleteClicked(View view)
+    {
+        var item = GetViewItem(view);
+        item.EntityAspect.Delete();
+        _todoItems.Remove(item);
+        NotifyDataSetChanged(); // trigger view reset so item disappears
+        _dataContext.Save();
+    }
+
+    private void IsDoneClicked(View view, CheckBox isDone)
+    {
+      var item = GetViewItem(view);
+      item.IsDone = isDone.Checked;
+      _dataContext.Save();
+    }
+
+    private TodoItem GetViewItem(View view)
+    {
+      if (view == null) { return null; }
+      var ix = Int32.Parse(view.Tag.ToString());
+      return _todoItems[ix];
+    }
+
+    public override int Count
+    {
+      get { return _todoItems.Count; }
+    }
+
+    // Overriding GetItem and GetItemId to do type conversion for Android 
+    // Is this really necessary???
+    public override Java.Lang.Object GetItem(int position)
+    {
+      return position;
+    }
+
+    public override long GetItemId(int position)
+    {
+      return position;
+    }
+
   }
 }
