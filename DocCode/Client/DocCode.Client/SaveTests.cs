@@ -345,6 +345,42 @@ namespace Test_NetClient
 
         }
 
+        [TestMethod]
+        public async Task RemovingNavigationProperty() {
+          var entityManager = await TestFns.NewEm(_northwindServiceName);
+
+          var employee = new Employee() {
+            FirstName = "First",
+            LastName = "Employee"
+          };
+          entityManager.AddEntity(employee);
+
+
+          var manager = new Employee() {
+            FirstName = "First",
+            LastName = "Manager"
+          };
+          entityManager.AddEntity(manager);
+          employee.Manager = manager;
+
+          try {
+            var saveResult = await entityManager.SaveChanges();
+
+            // Now reverse everything
+            manager.EntityAspect.Delete();
+            employee.Manager = null;
+
+            employee.EntityAspect.Delete();
+
+            saveResult = await entityManager.SaveChanges();
+
+          } catch (Exception e) {
+            var message = string.Format("Save should have succeeded;  Received {0}: {1}",
+                                        e.GetType().Name, e.Message);
+            Assert.Fail(message);
+          }
+
+        }
 
 
         #region Queued saves
