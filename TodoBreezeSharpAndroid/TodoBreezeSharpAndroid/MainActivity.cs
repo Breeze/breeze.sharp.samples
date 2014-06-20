@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Android.App;
 using Android.OS;
 using Android.Widget;
@@ -12,7 +13,7 @@ namespace TodoBreezeSharpAndroid {
     private Adapters.TodoGridAdapter todoGridAdapter;
     private GridView todosGridView;
     private TextView newTodoView;
-    private List<TodoItem> todos;
+    private List<TodoViewModel> todos;
     private IDataContext _dataContext;
     private ILogger _logger;
     private const string _knownServiceAddress = 
@@ -25,7 +26,6 @@ namespace TodoBreezeSharpAndroid {
       SetContentView(Resource.Layout.Main);
 
       todosGridView = FindViewById<GridView>(Resource.Id.gridview);
-      todosGridView.ItemSelected += (sender, e) => _logger.Log("View selected");
 
       newTodoView = FindViewById<TextView>(Resource.Id.NewTodoText);
       newTodoView.FocusChange += AddTodo;
@@ -40,7 +40,8 @@ namespace TodoBreezeSharpAndroid {
       newTodoView.Text = String.Empty;
       var item = new TodoItem {Description = description};
       _dataContext.AddTodo(item);
-      todos.Insert(0, item);        // top of the list
+      var vm = new TodoViewModel(item);
+      todos.Insert(0, vm);                    // front of the list
       todoGridAdapter.NotifyDataSetChanged(); // redraw
       await _dataContext.Save();
     }
@@ -48,10 +49,25 @@ namespace TodoBreezeSharpAndroid {
     public async void GetAllTodos()
     {
       _dataContext = new DataContext(_logger, _knownServiceAddress);
-      todos = await _dataContext.getAllTodos();
+      var items = await _dataContext.getAllTodos();
+
+      todos = items.Select(t => new TodoViewModel(t)).ToList();
       todoGridAdapter = new Adapters.TodoGridAdapter(this, todos, _dataContext);
       todosGridView.Adapter = todoGridAdapter;
     }
+  }
+
+  internal class TodoViewModel
+  {
+    private static int nextKey;
+
+    public TodoViewModel(TodoItem todo)
+    {
+      ViewKey = nextKey++;
+      Todo = todo;
+    }
+    public int ViewKey { get; private set; }
+    public TodoItem Todo { get; private set; }
   }
 }
 

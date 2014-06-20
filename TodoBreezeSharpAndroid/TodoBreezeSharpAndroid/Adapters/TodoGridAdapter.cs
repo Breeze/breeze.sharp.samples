@@ -1,26 +1,25 @@
 using System.Globalization;
+using System.Linq;
 using Android.App;
 using Android.Views;
 using Android.Widget;
 using System;
 using System.Collections.Generic;
-using Todo.Models;
 using TodoBreezeSharpAndroid.Services;
 
 namespace TodoBreezeSharpAndroid.Adapters
 {
-
   class TodoGridAdapter : BaseAdapter
   {
     private readonly Activity _context;
     private readonly IDataContext _dataContext;
-    private readonly List<TodoItem> _todoItems;
+    private readonly List<TodoViewModel> _todoVms;
 
-    public TodoGridAdapter(Activity context, List<TodoItem> todoItems, IDataContext dataContext)
+    public TodoGridAdapter(Activity context, List<TodoViewModel> todoVms, IDataContext dataContext)
     {
       _context = context;
       _dataContext = dataContext;
-      _todoItems = todoItems;
+      _todoVms = todoVms;
     }
 
     public override View GetView(int position, View convertView, ViewGroup parent)
@@ -40,8 +39,9 @@ namespace TodoBreezeSharpAndroid.Adapters
       var isDone = view.FindViewById<CheckBox>(Resource.Id.IsDoneCheckbox);
 
       // Copy item data to the controls
-      var item = _todoItems[position];
-      view.Tag = position.ToString(CultureInfo.InvariantCulture);
+      var vm = _todoVms[position];
+      var item = vm.Todo;
+      view.Tag = vm.ViewKey.ToString(CultureInfo.InvariantCulture);
       description.SetText(item.Description, TextView.BufferType.Normal);
       isDone.Checked = item.IsDone;
 
@@ -49,44 +49,46 @@ namespace TodoBreezeSharpAndroid.Adapters
         // add event handlers to new views only
         isDone.Click += (sender, e) => IsDoneClicked(view, isDone);
         description.FocusChange += (sender, e) => DescriptionUpdate(view, description);
-        delete.Click += (sender, e) => DeleteClicked(view);        
+        delete.Click += (sender, e) => DeleteClicked(view);
       }
       return view;
     }
 
     private void DescriptionUpdate(View view, TextView description)
     {
-      var item = GetViewItem(view);
+      var item = GetViewVm(view).Todo;
       item.Description = description.Text;
       if (_dataContext.HasChanges) { _dataContext.Save(); }
     }
 
     private void DeleteClicked(View view)
     {
-        var item = GetViewItem(view);
-        item.EntityAspect.Delete();
-        _todoItems.Remove(item);
+        var vm = GetViewVm(view);
+        vm.Todo.EntityAspect.Delete();
+
+        _todoVms.Remove(vm);
         NotifyDataSetChanged(); // trigger view reset so item disappears
         _dataContext.Save();
     }
 
     private void IsDoneClicked(View view, CheckBox isDone)
     {
-      var item = GetViewItem(view);
+      var item = GetViewVm(view).Todo;
       item.IsDone = isDone.Checked;
       _dataContext.Save();
     }
 
-    private TodoItem GetViewItem(View view)
+    private TodoViewModel GetViewVm(View view)
     {
       if (view == null) { return null; }
-      var ix = Int32.Parse(view.Tag.ToString());
-      return _todoItems[ix];
+      var key = Int32.Parse(view.Tag.ToString());
+      var vm = _todoVms.Single(x => x.ViewKey == key);
+      return vm;
     }
 
     public override int Count
     {
-      get { return _todoItems.Count; }
+      get { return _todoVms.Count; }
     }
 
     // Overriding GetItem and GetItemId to do type conversion for Android 
@@ -100,6 +102,5 @@ namespace TodoBreezeSharpAndroid.Adapters
     {
       return position;
     }
-
   }
 }
