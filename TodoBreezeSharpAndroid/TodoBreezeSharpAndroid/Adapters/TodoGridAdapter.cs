@@ -42,7 +42,7 @@ namespace TodoBreezeSharpAndroid.Adapters
       var vm = _todoVms[position];
       var item = vm.Todo;
       view.Tag = vm.ViewKey.ToString(CultureInfo.InvariantCulture);
-      description.SetText(item.Description, TextView.BufferType.Normal);
+      description.Text = item.Description;
       isDone.Checked = item.IsDone;
 
       if (isNewView) {
@@ -50,7 +50,6 @@ namespace TodoBreezeSharpAndroid.Adapters
         isDone.Click += (sender, e) => IsDoneClicked(view, isDone);
         description.FocusChange += Update;
         description.TextChanged += (sender, e) => DescriptionChanged(view, description);
-
         delete.Click += (sender, e) => DeleteClicked(view);
       }
       return view;

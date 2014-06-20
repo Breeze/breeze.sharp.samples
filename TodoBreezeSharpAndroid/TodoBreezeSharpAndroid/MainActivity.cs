@@ -32,7 +32,7 @@ namespace TodoBreezeSharpAndroid {
       GetAllTodos();
     }
 
-    private async void AddTodo(object sender, Android.Views.View.FocusChangeEventArgs e)
+    private async void AddTodo(object sender, EventArgs e)
     {
       var description = newTodoView.Text.Trim();
       if (String.IsNullOrEmpty(description) || todos == null) { return; }
