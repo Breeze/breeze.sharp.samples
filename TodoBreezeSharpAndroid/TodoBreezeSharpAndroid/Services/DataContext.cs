@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Breeze.Sharp;
 using Todo.Models;
@@ -9,17 +10,15 @@ namespace TodoBreezeSharpAndroid.Services
 {
   public interface IDataContext
   {
-    TodoItem AddTodo(TodoItem todo);
-    Task<List<TodoItem>> getAllTodos();
+    void AddTodo(TodoItem todo);
+    void DeleteTodo(TodoItem todo);
+    Task<List<TodoItem>> GetAllTodos();
     bool HasChanges { get; } 
     Task<SaveResult> Save();
   }
 
   public class DataContext : IDataContext
   {
-    private readonly EntityManager _em;
-    private readonly ILogger _logger;
-
     public DataContext(ILogger logger, string serviceAddress)
     {
       // Tell Breeze where to find model types
@@ -30,19 +29,61 @@ namespace TodoBreezeSharpAndroid.Services
       _logger = logger;
     }
 
-    public TodoItem AddTodo(TodoItem todo)
+    public void AddTodo(TodoItem todo)
     {
       _em.AddEntity(todo);
-      return todo;
     }
 
-    public async Task<List<TodoItem>>  getAllTodos()
+    // Cancel a prior save delay (if there is one)
+    private void CancelDelay()
+    {
+      if (_saveChangeTokenSource != null)
+      {
+        _saveChangeTokenSource.Cancel();
+        _saveChangeTokenSource = null;
+      }
+    }
+
+    public void DeleteTodo(TodoItem todo)
+    {
+      todo.EntityAspect.Delete();
+    }
+
+    private async void EntityChanged(object sender, EntityChangedEventArgs e)
+    {
+      // Save on propertyChanged (after brief delay)
+      if (e.Action == EntityAction.PropertyChange)
+      {
+        try
+        {        
+          CancelDelay();
+          // Delay 1/2 second to let more changes (keystrokes) arrive
+          // then save if there are still unsaved changes.
+          _saveChangeTokenSource = new CancellationTokenSource();
+          await Task.Delay(500, _saveChangeTokenSource.Token);
+          _saveChangeTokenSource = null;
+          if (HasChanges) { await Save(); }
+        }
+        catch (TaskCanceledException) {}
+        catch (Exception ex)  { _logger.Error(ex); } 
+      }
+      // Save Added or Deleted entity immediately
+      else if (e.Action == EntityAction.EntityStateChange &&
+              ((e.EntityAspect.EntityState & ADD_DELETE) != 0))
+      {
+        CancelDelay();
+        await Save();
+      }
+    }
+
+    public async Task<List<TodoItem>>  GetAllTodos()
     {
       var query = new EntityQuery<TodoItem>();
 
       try
       {
         var result = await _em.ExecuteQuery(query);
+        _em.EntityChanged += EntityChanged;
         return result.ToList();
       }
       catch (Exception e)
@@ -87,7 +128,10 @@ namespace TodoBreezeSharpAndroid.Services
       }
     }
 
+    private const EntityState ADD_DELETE = EntityState.Added | EntityState.Deleted;
+    private readonly EntityManager _em;
+    private readonly ILogger _logger;
+    private CancellationTokenSource _saveChangeTokenSource;
     private bool _saveQueued;
-
   }
 }

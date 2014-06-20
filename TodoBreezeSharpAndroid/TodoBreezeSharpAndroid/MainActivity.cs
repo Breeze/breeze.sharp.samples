@@ -23,16 +23,19 @@ namespace TodoBreezeSharpAndroid {
       base.OnCreate(bundle);
 
       _logger = new Logger(this);
+      _dataContext = new DataContext(_logger, _knownServiceAddress);
+
       SetContentView(Resource.Layout.Main);
 
       todosGridView = FindViewById<GridView>(Resource.Id.gridview);
 
       newTodoView = FindViewById<TextView>(Resource.Id.NewTodoText);
       newTodoView.FocusChange += AddTodo;
+
       GetAllTodos();
     }
 
-    private async void AddTodo(object sender, EventArgs e)
+    private void AddTodo(object sender, EventArgs e)
     {
       var description = newTodoView.Text.Trim();
       if (String.IsNullOrEmpty(description) || todos == null) { return; }
@@ -43,13 +46,11 @@ namespace TodoBreezeSharpAndroid {
       var vm = new TodoViewModel(item);
       todos.Insert(0, vm);                    // front of the list
       todoGridAdapter.NotifyDataSetChanged(); // redraw
-      await _dataContext.Save();
     }
 
     public async void GetAllTodos()
     {
-      _dataContext = new DataContext(_logger, _knownServiceAddress);
-      var items = await _dataContext.getAllTodos();
+      var items = await _dataContext.GetAllTodos();
 
       todos = items.Select(t => new TodoViewModel(t)).ToList();
       todoGridAdapter = new Adapters.TodoGridAdapter(this, todos, _dataContext);

@@ -48,7 +48,6 @@ namespace TodoBreezeSharpAndroid.Adapters
       if (isNewView) {
         // add event handlers to new views only
         isDone.Click += (sender, e) => IsDoneClicked(view, isDone);
-        description.FocusChange += Update;
         description.TextChanged += (sender, e) => DescriptionChanged(view, description);
         delete.Click += (sender, e) => DeleteClicked(view);
       }
@@ -57,31 +56,20 @@ namespace TodoBreezeSharpAndroid.Adapters
 
     private void DescriptionChanged(View view, TextView description)
     {
-      var item = GetViewVm(view).Todo;
-      item.Description = description.Text;
-      // but don't save right away; wait for  focus change (or call to Update)
-    }
-
-    private void Update(object sender = null, EventArgs e = null)
-    {
-      if (_dataContext.HasChanges) { _dataContext.Save();}
+      GetViewVm(view).Todo.Description = description.Text;
     }
 
     private void DeleteClicked(View view)
     {
         var vm = GetViewVm(view);
-        vm.Todo.EntityAspect.Delete();
-
+        _dataContext.DeleteTodo(vm.Todo);
         _todoVms.Remove(vm);
         NotifyDataSetChanged(); // trigger view reset so item disappears
-        _dataContext.Save();
     }
 
     private void IsDoneClicked(View view, CheckBox isDone)
     {
-      var item = GetViewVm(view).Todo;
-      item.IsDone = isDone.Checked;
-      _dataContext.Save();
+      GetViewVm(view).Todo.IsDone = isDone.Checked;
     }
 
     private TodoViewModel GetViewVm(View view)
