@@ -26,12 +26,22 @@ namespace TodoBreezeSharpAndroid.Services
       Configuration.Instance.ProbeAssemblies(assembly);
 
       _em = new EntityManager(serviceAddress);
+      _em.EntityChanged += EntityChanged;
       _logger = logger;
     }
 
     public void AddTodo(TodoItem todo)
     {
-      _em.AddEntity(todo);
+      try
+      {
+        _em.AddEntity(todo);
+      }
+      catch (Exception e)
+      {
+        // most likely cause is tried to add entity before there is metadata
+        _logger.Error(e);
+        throw;
+      }
     }
 
     // Cancel a prior save delay (if there is one)
@@ -51,16 +61,18 @@ namespace TodoBreezeSharpAndroid.Services
 
     private async void EntityChanged(object sender, EntityChangedEventArgs e)
     {
+      if (_ignoreEntityChanged) { return; }
+
       // Save on propertyChanged (after brief delay)
       if (e.Action == EntityAction.PropertyChange)
       {
         try
         {        
           CancelDelay();
-          // Delay 1/2 second to let more changes (keystrokes) arrive
+            // Delay 1 second to let more changes (keystrokes) arrive
           // then save if there are still unsaved changes.
           _saveChangeTokenSource = new CancellationTokenSource();
-          await Task.Delay(500, _saveChangeTokenSource.Token);
+            await Task.Delay(1000, _saveChangeTokenSource.Token);
           _saveChangeTokenSource = null;
           if (HasChanges) { await Save(); }
         }
@@ -78,18 +90,22 @@ namespace TodoBreezeSharpAndroid.Services
 
     public async Task<List<TodoItem>>  GetAllTodos()
     {
-      var query = new EntityQuery<TodoItem>();
-
       try
       {
-        var result = await _em.ExecuteQuery(query);
-        _em.EntityChanged += EntityChanged;
-        return result.ToList();
+        // ignore the flurry of events when query results arrive
+        _ignoreEntityChanged = true;
+        var query = new EntityQuery<TodoItem>();
+        var qr = await _em.ExecuteQuery(query);
+        _ignoreEntityChanged = false;
+        var result = qr.ToList();
+        _logger.Info("Got " + result.Count + " todos from the server");
+        return result;
       }
       catch (Exception e)
       {
         _logger.Error(e);
-        throw;
+        //throw; // if we want caller to hear it. But no caller is listening in this sample  
+        return null; // return useless result instead
       }
     }
 
@@ -115,7 +131,7 @@ namespace TodoBreezeSharpAndroid.Services
           {
             _logger.Log("Saving ...");
             result = await _em.SaveChanges();
-            _logger.Log("Saved ...");           
+            _logger.Info("Saved "+result.Entities.Count+" change(s)");           
           }
           IsSavePending = _saveQueued;
         }
@@ -124,12 +140,14 @@ namespace TodoBreezeSharpAndroid.Services
       catch (Exception e)
       {
         _logger.Error(e);
-        throw;     
+        //throw; // if we want caller to hear it. But no caller is listening in this sample  
+        return result; // return useless result instead.  
       }
     }
 
     private const EntityState ADD_DELETE = EntityState.Added | EntityState.Deleted;
     private readonly EntityManager _em;
+    private bool _ignoreEntityChanged;
     private readonly ILogger _logger;
     private CancellationTokenSource _saveChangeTokenSource;
     private bool _saveQueued;

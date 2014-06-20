@@ -40,12 +40,13 @@ namespace TodoBreezeSharpAndroid {
       var description = newTodoView.Text.Trim();
       if (String.IsNullOrEmpty(description) || todos == null) { return; }
 
-      newTodoView.Text = String.Empty;
       var item = new TodoItem {Description = description};
-      _dataContext.AddTodo(item);
+      try   { _dataContext.AddTodo(item); }
+      catch { return; } //eat the error because logging it at lower level
+      newTodoView.Text = String.Empty;
       var vm = new TodoViewModel(item);
       todos.Insert(0, vm);                    // front of the list
-      todoGridAdapter.NotifyDataSetChanged(); // redraw
+      todoGridAdapter.NotifyDataSetChanged(); // redraw   
     }
 
     public async void GetAllTodos()
