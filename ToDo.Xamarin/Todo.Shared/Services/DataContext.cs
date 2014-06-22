@@ -10,13 +10,17 @@ namespace Todo.Services
 {
   public class DataContext : IDataContext
   {
-    public DataContext(ILogger logger, string serviceAddress)
+    private const string _knownServiceAddress =
+      //"http://67.169.112.221:49798/android/breeze/todos/";
+      "http://xamarintasky.azurewebsites.net/breeze/todos/";
+
+    public DataContext(ILogger logger)
     {
       // Tell Breeze where to find model types
       var assembly = typeof(TodoItem).Assembly;
       Configuration.Instance.ProbeAssemblies(assembly);
 
-      _em = new EntityManager(serviceAddress);
+      _em = new EntityManager(_knownServiceAddress);
       _em.EntityChanged += EntityChanged;
       _logger = logger;
     }

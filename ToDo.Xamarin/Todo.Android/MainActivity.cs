@@ -17,14 +17,12 @@ namespace Todo.Android {
     private List<TodoViewModel> todos;
     private IDataContext _dataContext;
     private ILogger _logger;
-    private const string _knownServiceAddress = 
-        "http://67.169.112.221:49798/android/breeze/todos/";
 
     protected override void OnCreate(Bundle bundle) {
       base.OnCreate(bundle);
 
       _logger = new Logger(new SysLog(), new Services.Toast(this));
-      _dataContext = new DataContext(_logger, _knownServiceAddress);
+      _dataContext = new DataContext(_logger);
 
       SetContentView(Resource.Layout.Main);
 
