@@ -22,3 +22,8 @@ GetFtpCredential.ps1
 
 breeze-*.zip
 breeze*.nupkg
+
+#Don't commit databases (except manually in some cases)
+*.mdf
+*.ldf
+*.sdf
