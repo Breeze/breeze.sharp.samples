@@ -1,0 +1,69 @@
+{
+	"id": "c14e1cba-ae60-ba62-fdc0-99b746171a93",
+	"name": "XamarinTasky",
+	"description": "",
+	"order": [
+		"ea3efae6-1c75-814a-8af9-db654b04c5b0",
+		"a4ca7867-5df9-cbeb-8b3e-2d59048c99b1",
+		"a2b51f4f-f34d-93e7-5f5d-167a74d14075"
+	],
+	"folders": [],
+	"timestamp": 1403420360476,
+	"synced": false,
+	"requests": [
+		{
+			"id": "a2b51f4f-f34d-93e7-5f5d-167a74d14075",
+			"headers": "",
+			"url": "http://xamarintasky.azurewebsites.net/breeze/todos/Reset",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [],
+			"dataMode": "params",
+			"name": "RESET all todos",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1403420488912,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"collectionId": "c14e1cba-ae60-ba62-fdc0-99b746171a93",
+			"synced": false
+		},
+		{
+			"id": "a4ca7867-5df9-cbeb-8b3e-2d59048c99b1",
+			"headers": "",
+			"url": "http://xamarintasky.azurewebsites.net/breeze/todos/purge",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [],
+			"dataMode": "params",
+			"name": "PURGE all todos",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1403420411665,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"collectionId": "c14e1cba-ae60-ba62-fdc0-99b746171a93",
+			"synced": false
+		},
+		{
+			"id": "ea3efae6-1c75-814a-8af9-db654b04c5b0",
+			"headers": "",
+			"url": "http://xamarintasky.azurewebsites.net/breeze/todos/todos",
+			"pathVariables": {},
+			"method": "GET",
+			"data": [],
+			"dataMode": "params",
+			"name": "Get all Todos",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1403420360476,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"collectionId": "c14e1cba-ae60-ba62-fdc0-99b746171a93",
+			"synced": false
+		}
+	]
+}
