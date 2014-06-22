@@ -145,6 +145,7 @@ namespace TodoBreezeSharpAndroid.Services
       }
       catch (Exception e)
       {
+        IsSavePending = false;
         _logger.Error(e);
         //throw; // if we want caller to hear it. But no caller is listening in this sample  
         return result; // return useless result instead.  
