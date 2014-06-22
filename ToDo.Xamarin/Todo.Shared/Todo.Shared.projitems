@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>{4FF4A345-1B5E-429D-AEA4-13FF168434AD}</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Todo.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Models\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\DataContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\IDataContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\ILogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\ISysLog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\IToast.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Logger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\TodoItem.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)readme.txt" />
+  </ItemGroup>
+</Project>
