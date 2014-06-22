@@ -122,14 +122,16 @@ namespace Todo.Services
           {
             _logger.Log("Saving ...");
             result = await _em.SaveChanges();
+            IsSavePending = _saveQueued;  // true if someone tried to save while we were waiting
             var descs = String.Join(", ", 
                         result.Entities
                               .Select(x => (x is TodoItem) ? (x as TodoItem).Description : "")
                               .ToArray());
             _logger.Info("Saved "+result.Entities.Count+" change(s): "+ descs);           
+          } else {
+            IsSavePending = false;
           }
-          IsSavePending = _saveQueued;
-        }
+        } 
         return result;
       }
       catch (Exception e)
