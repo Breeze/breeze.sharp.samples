@@ -5,8 +5,8 @@ namespace Todo.Models
 {
     // DEMONSTRATION/DEVELOPMENT ONLY
     public class TodoDatabaseInitializer:
-        DropCreateDatabaseAlways<TodosContext> // re-creates every time the server starts
-        //DropCreateDatabaseIfModelChanges<TodosContext> 
+        //DropCreateDatabaseAlways<TodosContext> // re-creates every time the server starts
+        DropCreateDatabaseIfModelChanges<TodosContext> 
     {
         protected override void Seed(TodosContext context)
         {
@@ -18,13 +18,13 @@ namespace Todo.Models
             _baseCreatedAtDate = new DateTime(2012, 8, 22, 9, 0, 0);
 
             var todos = new[] {
-                // Description, IsDone, IsArchived
-                CreateTodo("Food", true, true),
-                CreateTodo("Water", true, true),
-                CreateTodo("Shelter", true, true),
-                CreateTodo("Bread", false, false),
-                CreateTodo("Cheese", true, false),
-                CreateTodo("Wine", false, false)
+                // Description, Notes, IsDone, IsArchived
+                CreateTodo("Food", "Who doesn't like Food?", true, true),
+                CreateTodo("Water", "Pure, clean, H20.", true, true),
+                CreateTodo("Shelter", "Even a tent under the stars will do.", true, true),
+                CreateTodo("Bread", "I love that rough, country bread.", false, false),
+                CreateTodo("Cheese", "Who doesn't eat Cheese?", true, false),
+                CreateTodo("Wine", "Who doesn't LOVE wine?", false, false)
            };
 
             Array.ForEach(todos, t => context.Todos.Add(t));
@@ -33,13 +33,14 @@ namespace Todo.Models
         }
 
         private static TodoItem CreateTodo(
-            string description, bool isDone, bool isArchived)
+            string description, string notes, bool isDone, bool isArchived)
         {
             _baseCreatedAtDate = _baseCreatedAtDate.AddMinutes(1);
             return new TodoItem
             {
                 CreatedAt = _baseCreatedAtDate,
                 Description = description,
+                Notes = notes,
                 IsDone = isDone,
                 IsArchived = isArchived
             };
@@ -59,6 +60,4 @@ namespace Todo.Models
         }
 
     }
-
-
 }

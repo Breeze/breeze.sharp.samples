@@ -1,4 +1,5 @@
-﻿namespace Todo.Models {
+﻿namespace Todo.Models
+{
     using System.Data.Entity;
 
     public class TodosContext : DbContext 
