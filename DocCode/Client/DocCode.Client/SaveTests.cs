@@ -199,7 +199,41 @@ namespace Test_NetClient
 
             Assert.IsTrue(details.All(od => od.OrderID == 0), "OrderID of every original detail should be zero after order deleted");
         }
-    
+
+        [TestMethod]
+        public async Task SaveWithDefaultBooleanvalues() {
+          var entityManager = await TestFns.NewEm(_todosServiceName);
+
+          var newTodo = entityManager.CreateEntity<TodoItem>();
+          var tempId = newTodo.Id;
+          newTodo.IsDone = false;
+          var tempIsDone = newTodo.IsDone;
+          var description = "Save todo in Breeze";
+          newTodo.Description = description;
+          
+
+          try {
+            await entityManager.SaveChanges();
+          } catch (Exception e) {
+            var message = "SaveChanges should not fail with the error " + e.Message;
+            Assert.Fail(message);
+          }
+
+          var id = newTodo.Id;
+          var isDone = newTodo.IsDone; // permanent id is now known
+          Assert.AreNotEqual(tempId, id, "Values should not match");
+          Assert.AreEqual(tempIsDone, isDone, "Values should match");
+
+          //entityManager.Clear();
+          //var query = new EntityQuery<TodoItem>().Where(td => td.Id == id);
+          //var todos1 = await entityManager.ExecuteQuery(query);
+          //Assert.IsTrue(todos1.Count() == 1, "Requery of saved Todo should yield one item");
+          //var todo1 = todos1.First();
+
+          //Assert.IsTrue(todo1.Description == description, "Requeried entity should have saved values");
+          //Assert.IsTrue(todo1.IsDone == isDone);
+        }
+
         [TestMethod]
         public async Task SaveWithAutoIdGeneration() {
             var entityManager = await TestFns.NewEm(_todosServiceName);

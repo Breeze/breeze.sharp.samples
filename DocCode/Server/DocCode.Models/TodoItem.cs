@@ -4,6 +4,9 @@ namespace Todo.Models
 {
     public class TodoItem 
     {
+      public TodoItem() {
+        IsDone = true; //changing default value for SaveWithDefaultBooleanvalues test
+      }
         public int Id { get; set; }                     // 42
 
         [Required, StringLength(maximumLength: 30)]     // Validation rules
