@@ -219,19 +219,8 @@ namespace Test_NetClient
             Assert.Fail(message);
           }
 
-          var id = newTodo.Id;
-          var isDone = newTodo.IsDone; // permanent id is now known
-          Assert.AreNotEqual(tempId, id, "Values should not match");
+          var isDone = newTodo.IsDone;
           Assert.AreEqual(tempIsDone, isDone, "Values should match");
-
-          //entityManager.Clear();
-          //var query = new EntityQuery<TodoItem>().Where(td => td.Id == id);
-          //var todos1 = await entityManager.ExecuteQuery(query);
-          //Assert.IsTrue(todos1.Count() == 1, "Requery of saved Todo should yield one item");
-          //var todo1 = todos1.First();
-
-          //Assert.IsTrue(todo1.Description == description, "Requeried entity should have saved values");
-          //Assert.IsTrue(todo1.IsDone == isDone);
         }
 
         [TestMethod]
