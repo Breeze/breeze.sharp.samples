@@ -6,7 +6,6 @@ namespace Todo.Models {
   public class TodoItem : BaseEntity {
     public TodoItem()
     {
-      Notes = String.Empty;
       CreatedAt = DateTime.UtcNow;
     }
 

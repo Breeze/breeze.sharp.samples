@@ -19,11 +19,9 @@ namespace Todo.Services
       var assembly = typeof(TodoItem).Assembly;
       Configuration.Instance.ProbeAssemblies(assembly);
 
-      var ds = new DataService(_knownServiceAddress);
-      ds.HttpClient.Timeout = new TimeSpan(0, 0, 10); // secs
-
-      _em = new EntityManager(ds);
+      _em = new EntityManager(_knownServiceAddress);
       _em.EntityChanged += EntityChanged;
+      SetTimeout(90); // longer at start to allow server (Azure) warmup
       _logger = logger;
     }
 
@@ -79,7 +77,8 @@ namespace Todo.Services
       }
     }
 
-    public async Task<List<TodoItem>> GetAllTodos() {
+    public async Task<List<TodoItem>> GetAllTodos()
+    {
       try {
         // ignore the flurry of events when query results arrive
         _ignoreEntityChanged = true;
@@ -88,6 +87,7 @@ namespace Todo.Services
         _ignoreEntityChanged = false;
         var result = qr.ToList();
         _logger.Info("Got " + result.Count + " todos from the server");
+        SetTimeout(); // revert to default timeout
         return result;
 
       } catch (Exception e) {
@@ -147,6 +147,11 @@ namespace Todo.Services
       _logger.Info("Saved " + result.Entities.Count + " change(s): " + descs);
     }
 
+    private void SetTimeout(int seconds = DEFAULT_TIMEOUT) {
+      _em.DataService.HttpClient.Timeout = new TimeSpan(0, 0, seconds);
+    }
+
+    private const int DEFAULT_TIMEOUT = 10; // secs;
     private const EntityState ADD_DELETE = EntityState.Added | EntityState.Deleted;
     private readonly EntityManager _em;
     private bool _ignoreEntityChanged;
