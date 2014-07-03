@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Breeze.ContextProvider;
 using Breeze.ContextProvider.EF6;
@@ -12,10 +14,13 @@ namespace DocCode.DataAccess
     /// </summary>
     public class TodosRepository
     {
-        private readonly EFContextProvider<TodosContext>
-            _contextProvider = new EFContextProvider<TodosContext>();
+        private readonly EFContextProvider<TodosContext> _contextProvider = new EFContextProvider<TodosContext>();
 
         private TodosContext Context { get { return _contextProvider.Context; } }
+
+        public TodosRepository() {
+            _contextProvider.BeforeSaveEntityDelegate = BeforeSaveEntity;
+        }
 
         public string Metadata
         {
@@ -48,6 +53,25 @@ namespace DocCode.DataAccess
         }
 
         #endregion
+
+        #region Save Interception
+
+        /// <summary>
+        /// Demonstration interceptor
+        /// </summary>
+        /// <returns>
+        /// True if can save this entity else throw exception
+        /// </returns>
+        /// <exception cref="System.InvalidOperationException" />
+        private bool BeforeSaveEntity(EntityInfo arg) {
+            var todo = arg.Entity as TodoItem;
+            if (todo != null && todo.Description.Contains("INTERCEPT")) {
+                todo.Description += " SAVED!";
+            }
+            return true;
+        }
+
+        #endregion SaveInterception
 
     }
 }
