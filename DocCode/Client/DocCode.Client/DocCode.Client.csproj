@@ -90,6 +90,7 @@
     <Compile Include="LookupListsTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ConcurrencyTests.cs" />
     <Compile Include="MiscTests.cs" />
     <Compile Include="NavigationTests.cs">
       <SubType>Code</SubType>
