@@ -45,6 +45,9 @@ namespace Test_NetClient
 
             // Modify and save the first Alfred
             alfred1.ContactTitle += "X";
+
+            // Currently, this throws due to "changes to an original record may not be saved"
+            // ...whatever that means
             var saveResult1 = await entityManager1.SaveChanges();
 
             // Attempt to modify and save the second Alfred
