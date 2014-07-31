@@ -95,6 +95,7 @@
     <Compile Include="NavigationTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ParallelTests.cs" />
     <Compile Include="QueryTests.cs">
       <SubType>Code</SubType>
     </Compile>
