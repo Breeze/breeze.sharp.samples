@@ -81,6 +81,7 @@
     <Compile Include="CreateEntityTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="EnumerableFns.cs" />
     <Compile Include="ExportImportTests.cs">
       <SubType>Code</SubType>
     </Compile>
