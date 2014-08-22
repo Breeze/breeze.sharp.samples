@@ -636,6 +636,49 @@ namespace Northwind.Models {
     }
   }
 
+  public partial class TimeLimit : BaseEntity {
+
+    public int Id {
+      get { return GetValue<int>(); }
+      set { SetValue(value); }
+    }
+    public System.TimeSpan MaxTime {
+      get { return GetValue<TimeSpan>(); }
+      set { SetValue(value); }
+    }
+    public TimeSpan? MinTime {
+      get { return GetValue<TimeSpan?>(); }
+      set { SetValue(value); }
+    }
+    public int? TimeGroupId {
+      get { return GetValue<int?>(); }
+      set { SetValue(value); }
+    }
+
+    public TimeGroup TimeGroup {
+      get { return GetValue<TimeGroup>(); }
+      set { SetValue(value); }
+    }
+  }
+
+  public partial class TimeGroup : BaseEntity {
+
+    public int Id {
+      get { return GetValue<int>(); }
+      set { SetValue(value); }
+    }
+    public string Comment {
+      get { return GetValue<string>(); }
+      set { SetValue(value); }
+    }
+
+    public NavigationSet<TimeLimit> TimeLimits {
+      get { return GetValue<NavigationSet<TimeLimit>>(); }
+      set { SetValue(value); }
+    }
+
+  }
+  
   public partial class User : BaseEntity {
 
     public long Id {
@@ -697,7 +740,6 @@ namespace Northwind.Models {
 
   }
 
-
   public partial class UserRole : BaseEntity {
 
     public long ID {
@@ -746,50 +788,6 @@ namespace Northwind.Models {
       set { SetValue(value); }
     }
 
-  }
-
-  public partial class TimeLimit : BaseEntity {
-
-    public int Id {
-      get { return GetValue<int>(); }
-      set { SetValue(value); }
-    }
-    public System.TimeSpan MaxTime {
-      get { return GetValue<TimeSpan>(); }
-      set { SetValue(value); }
-    }
-    public Nullable<System.TimeSpan> MinTime {
-      get { return GetValue<TimeSpan?>(); }
-      set { SetValue(value); }
-    }
-    public int? TimeGroupId {
-      get { return GetValue<int?>(); }
-      set { SetValue(value); }
-    }
-
-    public TimeGroup TimeGroup {
-      get { return GetValue<TimeGroup>(); }
-      set { SetValue(value); }
-    }
-  }
-
-
-  public partial class TimeGroup : BaseEntity {
-
-    public int Id {
-      get { return GetValue<int>(); }
-      set { SetValue(value); }
-    }
-    public string Comment {
-      get { return GetValue<string>(); }
-      set { SetValue(value); }
-    }
-
-    public NavigationSet<TimeLimit> TimeLimits {
-      get { return GetValue<NavigationSet<TimeLimit>>(); }
-      set { SetValue(value); }
-    }
-    
   }
 
 

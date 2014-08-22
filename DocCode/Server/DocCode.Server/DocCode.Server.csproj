@@ -161,6 +161,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\modernizr-2.7.2.js" />
+    <Content Include="tests\helpers\AjaxAdapterTestInterceptor.js" />
+    <Content Include="tests\helpers\metadataOnClient.js" />
+    <Content Include="tests\helpers\northwindDtoMetadata.js" />
+    <Content Include="tests\helpers\northwindMetadata.js" />
+    <Content Include="tests\helpers\northwindTestData.js" />
+    <Content Include="tests\helpers\testFns.js" />
     <Content Include="Web.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -179,9 +185,7 @@
       <Name>DocCode.Models</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="tests\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
